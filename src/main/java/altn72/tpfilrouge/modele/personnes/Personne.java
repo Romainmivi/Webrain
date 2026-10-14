@@ -3,19 +3,18 @@ package altn72.tpfilrouge.modele.personnes;
 public abstract class Personne {
 
     private final int id;
-    private String login;
+    private String email;
     private String motDePasse;//à chiffrer, revoir son implémentation
     private String prenom;
     private String nom;
-    private String pseudo;
+    private RolePersonne rolePersonne;
 
-    protected Personne(int id, String login, String motDePasse, String prenom, String nom, String pseudo) {
+    protected Personne(int id, String email, String motDePasse, String prenom, String nom) {
         this.id = id;
-        this.login = login;
+        this.email = email;
         this.motDePasse = motDePasse;
         this.prenom = prenom;
         this.nom = nom;
-        this.pseudo = pseudo;
     }
 
     public int getId() {
@@ -23,11 +22,11 @@ public abstract class Personne {
     }
 
     public String getLogin() {
-        return login;
+        return email;
     }
 
     public void setLogin(String login) {
-        this.login = login;
+        this.email = login;
     }
 
     public String getMotDePasse() {
@@ -54,11 +53,11 @@ public abstract class Personne {
         this.nom = nom;
     }
 
-    public String getPseudo() {
-        return pseudo;
+    public RolePersonne getRole() {
+        return rolePersonne;
     }
 
-    public void setPseudo(String pseudo) {
-        this.pseudo = pseudo;
+    public void setRole(RolePersonne rolePersonne) {
+        this.rolePersonne = rolePersonne;
     }
 }

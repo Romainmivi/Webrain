@@ -2,13 +2,13 @@ package altn72.tpfilrouge.modele.equipements;
 
 import altn72.tpfilrouge.modele.Station;
 
-public class Equipement {
+public class Equipement implements EquipementRepository {
 
     private final int id;
     private String description;
-    private Type type;//peut-être un string qui vient d'une class fille d'équipement
+    private TypeEquipement typeEquipement;
     private Station station;
-    private fonctionnement enFonctionnement = fonctionnement.ETEINT;
+    private Etat enFonctionnement = Etat.ETEINT;
 
     public Equipement(int id) {
         this.id = id;
@@ -18,18 +18,18 @@ public class Equipement {
         return id;
     }
 
-    public enum fonctionnement{ //nom à revoir
+    public enum Etat{ //nom à revoir
         ETEINT, EN_MARCHE, HS
     }
 
     public void setStation(Station station) {
     }
 
-    public fonctionnement getEtat() {
+    public Etat getEtat() {
         return enFonctionnement;
     }
 
-    public void setEtat(fonctionnement enFonctionnement) {
+    public void setEtat(Etat enFonctionnement) {
         this.enFonctionnement = enFonctionnement;
     }
 }

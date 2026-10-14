@@ -15,9 +15,11 @@ public class Evaluation {
     private final int note;
     private final String commentaire;   // peut être null
     private final LocalDate date;
+    private final Incident incident;
 
     public Evaluation(int id, Personne personne, int note,
-                      String commentaire, LocalDate date) {
+                      String commentaire, LocalDate date, Incident incident) {
+        this.incident = incident;
         if (note < NOTE_MIN || note > NOTE_MAX) {
             throw new IllegalArgumentException(
                     "La note doit être comprise entre " + NOTE_MIN + " et " + NOTE_MAX);
@@ -47,5 +49,9 @@ public class Evaluation {
 
     public Personne getPersonne() {
         return personne;
+    }
+
+    public Incident getIncident_id() {
+        return incident;
     }
 }

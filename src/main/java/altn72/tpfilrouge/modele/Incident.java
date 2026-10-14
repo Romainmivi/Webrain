@@ -1,6 +1,7 @@
 package altn72.tpfilrouge.modele;
 
 import altn72.tpfilrouge.modele.equipements.Equipement;
+import altn72.tpfilrouge.modele.personnes.Agent;
 
 import java.sql.Date;
 
@@ -8,6 +9,10 @@ public class Incident {
 
     public int getId() {
         return id;
+    }
+
+    public Agent getAgent() {
+        return agent;
     }
 
     public enum Status {
@@ -21,21 +26,24 @@ public class Incident {
     private Status status;
     private Prestataire prestataire;
     private Date dateCloture;
+    private final Agent agent;
 
-    public Incident(int id, Equipement equipement, String description, Date dateOuverture, Prestataire prestataire) {
+    public Incident(int id, Equipement equipement, String description, Date dateOuverture, Prestataire prestataire, Agent agent) {
         this.id = id;
         this.equipement = equipement;
         this.description = description;
         this.dateOuverture = dateOuverture;
+        this.agent = agent;
         this.status = Status.OUVERT;
         this.prestataire = prestataire;
     }
 
-    public Incident(int id, Equipement equipement, String description, Date dateOuverture) {
+    public Incident(int id, Equipement equipement, String description, Date dateOuverture, Agent agent) {
         this.id = id;
         this.equipement = equipement;
         this.description = description;
         this.dateOuverture = dateOuverture;
+        this.agent = agent;
         this.status = Status.OUVERT;
     }
 

@@ -7,33 +7,29 @@ import java.util.List;
 
 public class Station {
     private final int id;
-    private final String code;
     private String nom;
-    private final double latitude;
-    private final double longitude;
-    private String adresse;
+    private double latitude;
+    private double longitude;
+    private final String adresse;
     private String ville;
-    private String zone;
 
-    private List<Equipement> Equipements = new ArrayList<>();
+    private final List<Equipement> Equipements = new ArrayList<>();
 
-    public Station(int id, String code, String nom, double latitude, double longitude, String adresse) {
+
+    public Station(int id, String nom, String adresse, String ville) {
         this.id = id;
-        this.code = code;
         this.nom = nom;
-        this.latitude = latitude;
-        this.longitude = longitude;
-    }
-
-    public Station(int id, String code, String nom, double latitude, double longitude, String adresse, String ville, String zone) {
-        this.id = id;
-        this.code = code;
-        this.nom = nom;
-        this.latitude = latitude;
-        this.longitude = longitude;
         this.adresse = adresse;
         this.ville = ville;
-        this.zone = zone;
+    }
+
+    public Station(int id, String nom, double latitude, double longitude, String adresse, String ville) {
+        this.id = id;
+        this.nom = nom;
+        this.adresse = adresse;
+        this.ville = ville;
+        this.latitude = latitude;
+        this.longitude = longitude;
     }
 
     public void ajouterEquipement(Equipement e) {
@@ -43,13 +39,12 @@ public class Station {
 
     public long nbEquipementsHorsService() {
         return Equipements.stream()
-                .filter(e -> e.getEtat() == Equipement.fonctionnement.HS)
+                .filter(e -> e.getEtat() == Equipement.Etat.HS)
                 .count();
     }
 
     // getters / setters
     public int getId() { return id; }
-    public String getCode() { return code; }
     public String getNom() { return nom; }
     public double getLatitude() { return latitude; }
     public double getLongitude() { return longitude; }
@@ -58,10 +53,6 @@ public class Station {
 
     public String getAdresse() {
         return adresse;
-    }
-
-    public void setAdresse(String adresse) {
-        this.adresse = adresse;
     }
 
     public void setNom(String nom){
@@ -76,20 +67,11 @@ public class Station {
         this.ville = ville;
     }
 
-    public String getZone() {
-        return zone;
-    }
-
-    public void setZone(String zone) {
-        this.zone = zone;
-    }
-
-    public void addEquipement(Equipement equipement){
-        Equipements.add(equipement);
-    }
-
     public void addEquipements(List<Equipement> equipements){
-        Equipements.addAll(equipements);
+        equipements.forEach(equipement -> {
+            equipement.setStation(this);
+            Equipements.add(equipement);
+        });
     }
 
     public void removeEquipementById(int id){

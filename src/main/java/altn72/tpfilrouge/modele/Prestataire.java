@@ -1,13 +1,31 @@
 package altn72.tpfilrouge.modele;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
 import java.util.Objects;
 
+@Entity
+@Table(name = "prestataire")
 public class Prestataire {
 
-    private final int id;
+    @Id
+    @Column(name = "id_prestataire", nullable = false)
+    private int id;
+
+    @Column(name = "nom", nullable = false, length = 100)
     private String nom;
+
+    @Column(name = "num_telephone", length = 30)
     private String numTelephone;
+
+    @Column(name = "email", length = 150)
     private String email;
+
+    protected Prestataire() {
+    }
 
     private Prestataire(int id, String nom, String numTelephone, String email) {
         this.id = id;

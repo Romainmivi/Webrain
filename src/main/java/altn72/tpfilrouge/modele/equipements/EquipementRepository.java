@@ -1,4 +1,7 @@
 package altn72.tpfilrouge.modele.equipements;
 
-public interface EquipementRepository {
+import altn72.tpfilrouge.modele.Programmeur;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface EquipementRepository extends JpaRepository<Equipement, Integer> {
 }

@@ -1,20 +1,42 @@
 package altn72.tpfilrouge.modele;
 
 import altn72.tpfilrouge.modele.equipements.Equipement;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Entity
+@Table(name = "station")
 public class Station {
-    private final int id;
+    @Id
+    @Column(name = "id_station", nullable = false)
+    private int id;
+
+    @Column(name = "nom", nullable = false, length = 100)
     private String nom;
+
+    @Column(name = "latitude")
     private double latitude;
+
+    @Column(name = "longitude")
     private double longitude;
-    private final String adresse;
+
+    @Column(name = "adresse", nullable = false)
+    private String adresse;
+
+    @Column(name = "ville", nullable = false, length = 100)
     private String ville;
 
+    @OneToMany(mappedBy = "station")
     private final List<Equipement> Equipements = new ArrayList<>();
 
+    protected Station() {
+    }
 
     public Station(int id, String nom, String adresse, String ville) {
         this.id = id;

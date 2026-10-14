@@ -1,4 +1,5 @@
 
+
 # Journal — Webrain (ALTN72, 2026-27)
 **Groupe :** Romain MILLET, Julien OUDIN
 ## README
@@ -11,6 +12,17 @@
 ## ARCHITECTURE
 - Dépôt : https://github.com/Romainmivi/Webrain
 - Schéma : ![architecture](docs/architecture.png)
+- Chaque équipement hérite d'un type abstrait équipement pour centraliser les attributs et méthodes en commun. De même, l'agent et le responsable héritent de la classe abstraite "Personne".
+Le prestataire quant à lui est considéré comme une entreprise et non comme un lot de "Personne". Il contiendra seulement un identifiant (unique), un nom et son contact.  
+
+- Comme vu en cours, nous utiliserons MariaDB.  
+Nous prévoyons d'utiliser un serveur personnel pour héberger notre solution. C'est un défi supplémentaire que nous sommes prêts à relever. Pour ne pas polluer ce serveur personnel, nous utiliserons Docker afin de conteneuriser notre JVM.
+- Choix de base de données :
+	- Nous avons une table **personne** pour stocker les différents employés. Nous ajoutons un table **role** qui liera chaque personne à son emploi.
+	- Une évaluation est rattachée à un incident (son id). Nous retrouverons l'évaluateur et le prestataire via l'incident pour éviter les redondances de la table.
+
+
+
 ## TESTS
 - Stratégie : …
 - Commande : `mvn verify`
@@ -27,8 +39,9 @@
 |F6|Modifier un incident|Accès complet|Modification autorisée seulement pour : Description, équipement, station, durée d’ouverture. Lecture seule pour : prestataire éventuel, évaluation éventuelle.|
 |F7|Affecter ou réaffecter un prestataire|Accès complet|Interdit|
 |F8|Déclarer un incident résolu|Accès complet|Accès complet (une vérification serait possible mais la confiance en l'agent doit être privilégiée)|
-|F9|Consulter l'historique|Lecture seule|Lecture seule|
-|F10|Evaluer un prestataire|Section commentaire Mainteneur|Section commentaire Agent|
+|F9a|Consulter l'historique|Lecture seule|Lecture seule|
+|F9b|Modifier l'historique manuellement|Si la modification est autorisée, alors il faut qu'un log note cette suppression, il ne doit pas être autorisé à invisibliser ses actions|Interdit|
+|F10|Evaluer un prestataire|Accès complet et vérification de la note de l'agent|Ecriture et lecture|
 |F11|Accéder au tableau de bord|Accès complet|Lecture seule|
 
 

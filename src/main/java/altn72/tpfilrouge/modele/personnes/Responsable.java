@@ -10,7 +10,11 @@ public class Responsable extends Personne{
     protected Responsable() {
     }
 
-    protected Responsable(int id, String login, String motDePasse, String prenom, String nom, String pseudo) {
-        super(id, login, motDePasse, prenom, nom, pseudo);
+    protected Responsable(int id, String login, String motDePasse, String prenom, String nom) {
+        super(id, login, motDePasse, prenom, nom);
+    }
+
+    public Responsable(String login, String motDePasse, String prenom, String nom) {
+        super(null, login, motDePasse, prenom, nom);
     }
 }

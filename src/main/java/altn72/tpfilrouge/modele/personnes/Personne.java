@@ -3,11 +3,14 @@ package altn72.tpfilrouge.modele.personnes;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorColumn;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -17,13 +20,14 @@ import jakarta.persistence.Table;
 public abstract class Personne {
 
     @Id
-    @Column(name = "id_personne", nullable = false)
-    private int id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false, updatable = false)
+    private Integer id;
 
-    @Column(name = "email", nullable = false, unique = true, length = 150)
+    @Column(name = "login", nullable = false, unique = true, length = 100)
     private String email;
 
-    @Column(name = "mot_de_passe", nullable = false, length = 255)
+    @Column(name = "mot_de_passe", nullable = false, columnDefinition = "mediumtext")
     private String motDePasse;//à chiffrer, revoir son implémentation
 
     @Column(name = "prenom", nullable = false, length = 100)
@@ -32,14 +36,10 @@ public abstract class Personne {
     @Column(name = "nom", nullable = false, length = 100)
     private String nom;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "role_personne", nullable = false, length = 20)
-    private RolePersonne rolePersonne;
-
     protected Personne() {
     }
 
-    protected Personne(int id, String email, String motDePasse, String prenom, String nom) {
+    protected Personne(Integer id, String email, String motDePasse, String prenom, String nom) {
         this.id = id;
         this.email = email;
         this.motDePasse = motDePasse;
@@ -47,7 +47,7 @@ public abstract class Personne {
         this.nom = nom;
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
@@ -83,11 +83,4 @@ public abstract class Personne {
         this.nom = nom;
     }
 
-    public RolePersonne getRole() {
-        return rolePersonne;
-    }
-
-    public void setRole(RolePersonne rolePersonne) {
-        this.rolePersonne = rolePersonne;
-    }
 }

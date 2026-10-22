@@ -20,21 +20,21 @@ import jakarta.persistence.Table;
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "categorie_equipement")
 @DiscriminatorValue("EQUIPEMENT")
-public class Equipement implements EquipementRepository {
+public class Equipement {
 
     @Id
-    @Column(name = "id_equipement", nullable = false)
+    @Column(name = "id", nullable = false)
     private int id;
 
     @Column(name = "description", length = 500)
     private String description;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "type_equipement", length = 40)
+    @Column(name = "type_id", length = 40)
     private TypeEquipement typeEquipement;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_station")
+    @JoinColumn(name = "station_id")
     private Station station;
 
     @Enumerated(EnumType.STRING)

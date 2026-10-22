@@ -13,4 +13,8 @@ public class Agent extends Personne{
     protected Agent(int id, String login, String motDePasse, String prenom, String nom) {
         super(id, login, motDePasse, prenom, nom);
     }
+
+    public Agent(String login, String motDePasse, String prenom, String nom) {
+        super(null, login, motDePasse, prenom, nom);
+    }
 }

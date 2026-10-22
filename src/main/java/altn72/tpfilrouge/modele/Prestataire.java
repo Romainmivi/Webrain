@@ -12,7 +12,7 @@ import java.util.Objects;
 public class Prestataire {
 
     @Id
-    @Column(name = "id_prestataire", nullable = false)
+    @Column(name = "id", nullable = false)
     private int id;
 
     @Column(name = "nom", nullable = false, length = 100)

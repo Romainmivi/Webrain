@@ -14,7 +14,7 @@ import java.util.List;
 @Table(name = "station")
 public class Station {
     @Id
-    @Column(name = "id_station", nullable = false)
+    @Column(name = "id", nullable = false)
     private int id;
 
     @Column(name = "nom", nullable = false, length = 100)

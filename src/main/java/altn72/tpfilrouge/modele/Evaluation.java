@@ -20,12 +20,8 @@ public class Evaluation {
     private static final int NOTE_MAX = 5;
 
     @Id
-    @Column(name = "id_evaluation", nullable = false)
+    @Column(name = "id", nullable = false)
     private int id;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_personne", nullable = false)
-    private Personne personne;
 
     @Column(name = "note", nullable = false)
     private int note;
@@ -33,17 +29,17 @@ public class Evaluation {
     @Column(name = "commentaire")
     private String commentaire;   // peut être null
 
-    @Column(name = "date_evaluation", nullable = false)
+    @Column(name = "date", nullable = false)
     private LocalDate date;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_incident")
+    @JoinColumn(name = "incident_id")
     private Incident incident;
 
     protected Evaluation() {
     }
 
-    public Evaluation(int id, Personne personne, int note,
+    public Evaluation(int id, int note,
                       String commentaire, LocalDate date, Incident incident) {
         this.incident = incident;
         if (note < NOTE_MIN || note > NOTE_MAX) {
@@ -51,7 +47,6 @@ public class Evaluation {
                     "La note doit être comprise entre " + NOTE_MIN + " et " + NOTE_MAX);
         }
         this.id = id;
-        this.personne = Objects.requireNonNull(personne);
         this.note = note;
         this.commentaire = commentaire;
         this.date = Objects.requireNonNull(date);
@@ -74,7 +69,7 @@ public class Evaluation {
     }
 
     public Personne getPersonne() {
-        return personne;
+        return incident.getAgent();
     }
 
     public Incident getIncident_id() {

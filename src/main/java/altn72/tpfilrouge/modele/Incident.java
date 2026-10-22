@@ -31,11 +31,11 @@ public class Incident {
     }
 
     @Id
-    @Column(name = "id_incident", nullable = false)
+    @Column(name = "id", nullable = false)
     private int id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_equipement", nullable = false)
+    @JoinColumn(name = "equipement_id", nullable = false)
     private Equipement equipement;
 
     @Column(name = "description", nullable = false, length = 1000)
@@ -45,18 +45,18 @@ public class Incident {
     private Date dateOuverture;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, length = 20)
+    @Column(name = "statut", nullable = false, length = 20)
     private Status status;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_prestataire")
+    @JoinColumn(name = "prestataire_id")
     private Prestataire prestataire;
 
     @Column(name = "date_cloture")
     private Date dateCloture;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_agent", nullable = false)
+    @JoinColumn(name = "agent_id", nullable = false)
     private Agent agent;
 
     protected Incident() {

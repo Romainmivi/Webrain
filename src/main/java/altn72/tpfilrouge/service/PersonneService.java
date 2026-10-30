@@ -51,4 +51,12 @@ public class PersonneService {
     public List<Agent> getAgents() {
         return agentRepository.findAll();
     }
+
+    @Transactional
+    public boolean supprimerAgent(Integer idAgent) {
+        if (!agentRepository.existsById(idAgent)) return false;
+        agentRepository.deleteById(idAgent);
+        return true;
+    }
+
 }

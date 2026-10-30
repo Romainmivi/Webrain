@@ -25,7 +25,7 @@ public abstract class Personne {
     private Integer id;
 
     @Column(name = "login", nullable = false, unique = true, length = 100)
-    private String email;
+    private String login;
 
     @Column(name = "mot_de_passe", nullable = false, columnDefinition = "mediumtext")
     private String motDePasse;//à chiffrer, revoir son implémentation
@@ -39,9 +39,9 @@ public abstract class Personne {
     protected Personne() {
     }
 
-    protected Personne(Integer id, String email, String motDePasse, String prenom, String nom) {
+    protected Personne(Integer id, String login, String motDePasse, String prenom, String nom) {
         this.id = id;
-        this.email = email;
+        this.login = login;
         this.motDePasse = motDePasse;
         this.prenom = prenom;
         this.nom = nom;
@@ -52,11 +52,11 @@ public abstract class Personne {
     }
 
     public String getLogin() {
-        return email;
+        return login;
     }
 
     public void setLogin(String login) {
-        this.email = login;
+        this.login = login;
     }
 
     public String getMotDePasse() {

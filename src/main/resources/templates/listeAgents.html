@@ -31,7 +31,7 @@
                     <button class="btn btn-info btn-sm">Modifiez</button>
                 </form>
 
-                <form th:action="@{/api/personnes/{idAgent}(idAgent=${agent.id})}" th:method="DELETE" style="display:inline;">
+                <form th:action="@{/api/personnes/agent/{idAgent}(idAgent=${agent.id})}" th:method="DELETE" style="display:inline;">
                     <button class="btn btn-warning btn-sm">Supprimez</button>
                 </form>
             </td>

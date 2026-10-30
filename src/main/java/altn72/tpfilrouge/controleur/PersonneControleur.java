@@ -57,8 +57,8 @@ public class PersonneControleur {
         return "detailsAgent";
     }
 
-    @DeleteMapping("/{idAgent}")
-    public String deleteProgrammeur(@PathVariable("idAgent") Integer idAgent) {
+    @DeleteMapping("/agent/{idAgent}")
+    public String deleteAgent(@PathVariable("idAgent") Integer idAgent) {
         if (!personneService.supprimerAgent(idAgent)) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "L'agent dont l'id est " + idAgent + " n'existe pas");
@@ -79,22 +79,20 @@ public class PersonneControleur {
 
     @GetMapping("/responsable/nouveau")
     public String preparerAjoutProgrammeur(Model model) {
-        model.addAttribute("nouveauProgrammeur", new Programmeur());
+        model.addAttribute("nouveauResponsable", new ResponsableRequest("","", "", ""));
         return "nouveauResponsable";
     }
 
     // A revoir
     @PostMapping("/addResponsable")
-    public ResponseEntity<ResponsableResponse> ajouterResponsable(@RequestBody ResponsableRequest request) {
+    public String ajouterResponsable(@ModelAttribute AgentRequest request) {
         Responsable responsable = personneService.ajouterResponsable(
                 request.login(),
                 request.motDePasse(),
                 request.prenom(),
                 request.nom()
         );
-        ResponsableResponse response = toResponse(responsable);
-        return ResponseEntity.created(URI.create("/api/personnes/responsables/" + responsable.getId()))
-                .body(response);
+        return "redirect:/api/personnes/getResponsable/" + responsable.getId();
     }
 
     @GetMapping("/getResponsable/{id}")
@@ -103,6 +101,15 @@ public class PersonneControleur {
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Responsable introuvable"));
         model.addAttribute("responsable", responsable);
         return "detailsResponsable";
+    }
+
+    @DeleteMapping("/responsable/{idResponsable}")
+    public String deleteResponsable(@PathVariable("idResponsable") Integer idResponsable) {
+        if (!personneService.supprimerResponsable(idResponsable)) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "L'agent dont l'id est " + idResponsable + " n'existe pas");
+        }
+        return "redirect:/api/personnes/getResponsables";
     }
 
     private ResponsableResponse toResponse(Responsable responsable) {

@@ -59,4 +59,9 @@ public class PersonneService {
         return true;
     }
 
+    public boolean supprimerResponsable(Integer idResponsable) {
+        if (!responsableRepository.existsById(idResponsable)) return false;
+        responsableRepository.deleteById(idResponsable);
+        return true;
+    }
 }

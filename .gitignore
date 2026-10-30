@@ -1,0 +1,25 @@
+# Build
+target/
+build/
+out/
+
+# IntelliJ
+.idea/
+*.iml
+
+# Eclipse / VS Code
+.classpath
+.project
+.settings/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Secrets / config locale
+application-local.properties
+.env

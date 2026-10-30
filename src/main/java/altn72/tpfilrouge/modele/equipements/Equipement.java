@@ -30,29 +30,35 @@ public class Equipement {
     private String description;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "type_id", length = 40)
+    @Column(nullable = false, name = "type_equipement" , length = 40)
     private TypeEquipement typeEquipement;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "station_id")
+    @JoinColumn(name = "station_id", nullable = false)
     private Station station;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "etat", nullable = false, length = 20)
-    private Etat enFonctionnement = Etat.ETEINT;
+    private Etat etat;
 
-    protected Equipement() {
+
+    public Equipement(int id, String description, TypeEquipement typeEquipement, Station station, Etat etat) {
+        this.id = id;
+        this.description = description;
+        this.station = station;
+        this.typeEquipement = typeEquipement;
+        this.etat = etat;
     }
 
-    public Equipement(int id) {
-        this.id = id;
+    public Equipement() {
+
     }
 
     public int getId() {
         return id;
     }
 
-    public enum Etat{ //nom à revoir
+    public enum Etat{
         ETEINT, EN_MARCHE, HS
     }
 
@@ -60,11 +66,32 @@ public class Equipement {
         this.station = station;
     }
 
+    public Station getStation() {
+        return station;
+    }
+
     public Etat getEtat() {
-        return enFonctionnement;
+        return etat;
     }
 
     public void setEtat(Etat enFonctionnement) {
-        this.enFonctionnement = enFonctionnement;
+        this.etat = enFonctionnement;
     }
+
+    public String getDescription(){
+        return description;
+    }
+
+    public void setDescription(String description){
+        this.description = description;
+    }
+
+    public TypeEquipement getType() {
+        return typeEquipement;
+    }
+
+    public void setType(TypeEquipement typeEquipement) {
+        this.typeEquipement = typeEquipement;
+    }
+
 }

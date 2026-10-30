@@ -10,6 +10,6 @@ public class DistributeurTitreTransport extends Equipement {
     }
 
     public DistributeurTitreTransport(int id) {
-        super(id);
+        super();
     }
 }

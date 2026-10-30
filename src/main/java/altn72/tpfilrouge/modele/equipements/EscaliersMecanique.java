@@ -10,6 +10,6 @@ public class EscaliersMecanique extends Equipement {
     }
 
     public EscaliersMecanique(int id) {
-        super(id);
+        super();
     }
 }

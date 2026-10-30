@@ -10,6 +10,6 @@ public class Portiques extends Equipement {
     }
 
     public Portiques(int id) {
-        super(id);
+        super();
     }
 }

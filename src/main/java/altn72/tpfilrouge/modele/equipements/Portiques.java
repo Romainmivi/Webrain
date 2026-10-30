@@ -1,5 +1,6 @@
 package altn72.tpfilrouge.modele.equipements;
 
+import altn72.tpfilrouge.modele.Station;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 
@@ -9,7 +10,7 @@ public class Portiques extends Equipement {
     protected Portiques() {
     }
 
-    public Portiques(int id) {
-        super();
+    public Portiques(String description, TypeEquipement typeEquipement, Station station, Etat etat) {
+        super(description, typeEquipement, station, etat);
     }
 }

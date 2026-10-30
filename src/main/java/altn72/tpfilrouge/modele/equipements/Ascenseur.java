@@ -1,5 +1,6 @@
 package altn72.tpfilrouge.modele.equipements;
 
+import altn72.tpfilrouge.modele.Station;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 
@@ -9,7 +10,7 @@ public class Ascenseur extends Equipement {
     protected Ascenseur() {
     }
 
-    public Ascenseur(int id) {
-        super();
+    public Ascenseur(String description, TypeEquipement typeEquipement, Station station, Etat etat) {
+        super(description, typeEquipement, station, etat);
     }
 }

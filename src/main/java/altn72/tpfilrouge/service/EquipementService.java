@@ -2,8 +2,13 @@ package altn72.tpfilrouge.service;
 
 import altn72.tpfilrouge.modele.Station;
 import altn72.tpfilrouge.modele.StationRepository;
+import altn72.tpfilrouge.modele.equipements.Ascenseur;
+import altn72.tpfilrouge.modele.equipements.DistributeurTitreTransport;
+import altn72.tpfilrouge.modele.equipements.EcranInformations;
+import altn72.tpfilrouge.modele.equipements.EscaliersMecanique;
 import altn72.tpfilrouge.modele.equipements.Equipement;
 import altn72.tpfilrouge.modele.equipements.EquipementRepository;
+import altn72.tpfilrouge.modele.equipements.Portiques;
 import altn72.tpfilrouge.modele.equipements.TypeEquipement;
 import org.springframework.stereotype.Service;
 
@@ -34,7 +39,13 @@ public class EquipementService {
         Station station = stationRepository.findById(idStation)
                 .orElseThrow(() -> new IllegalArgumentException("Station introuvable"));
 
-        Equipement equipement = new Equipement(1, description, typeEquipement, station, etat);
+        Equipement equipement = switch (typeEquipement) {
+            case ASCENSEUR -> new Ascenseur(description, typeEquipement, station, etat);
+            case DISTRIBUTEUR -> new DistributeurTitreTransport(description, typeEquipement, station, etat);
+            case ECRAN_INFORMATION -> new EcranInformations(description, typeEquipement, station, etat);
+            case ESCALIER -> new EscaliersMecanique(description, typeEquipement, station, etat);
+            case PORTIQUE -> new Portiques(description, typeEquipement, station, etat);
+        };
         return equipementRepository.save(equipement);
     }
 

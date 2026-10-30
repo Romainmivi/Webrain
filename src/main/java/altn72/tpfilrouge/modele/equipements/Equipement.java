@@ -8,6 +8,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
@@ -23,8 +25,9 @@ import jakarta.persistence.Table;
 public class Equipement {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
-    private int id;
+    private Integer id;
 
     @Column(name = "description", length = 500)
     private String description;
@@ -42,19 +45,18 @@ public class Equipement {
     private Etat etat;
 
 
-    public Equipement(int id, String description, TypeEquipement typeEquipement, Station station, Etat etat) {
-        this.id = id;
+    protected Equipement(String description, TypeEquipement typeEquipement, Station station, Etat etat) {
         this.description = description;
         this.station = station;
         this.typeEquipement = typeEquipement;
         this.etat = etat;
     }
 
-    public Equipement() {
+    protected Equipement() {
 
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 

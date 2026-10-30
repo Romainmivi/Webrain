@@ -111,5 +111,5 @@ public class PersonneControleur {
 
     public record ResponsableRequest(String login, String motDePasse, String prenom, String nom) {
     }
-    
+
 }

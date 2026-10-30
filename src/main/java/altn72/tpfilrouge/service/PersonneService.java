@@ -2,18 +2,23 @@ package altn72.tpfilrouge.service;
 
 import altn72.tpfilrouge.modele.personnes.Agent;
 import altn72.tpfilrouge.modele.personnes.AgentRepository;
+import altn72.tpfilrouge.modele.personnes.Responsable;
+import altn72.tpfilrouge.modele.personnes.ResponsableRepository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
 public class PersonneService {
 
     private final AgentRepository agentRepository;
+    private final ResponsableRepository responsableRepository;
 
-    public PersonneService(AgentRepository agentRepository) {
+    public PersonneService(AgentRepository agentRepository, ResponsableRepository responsableRepository) {
         this.agentRepository = agentRepository;
+        this.responsableRepository = responsableRepository;
     }
 
     @Transactional
@@ -25,5 +30,25 @@ public class PersonneService {
     @Transactional(readOnly = true)
     public Optional<Agent> getAgent(Integer id) {
         return agentRepository.findById(id);
+    }
+
+
+    @Transactional
+    public Responsable ajouterResponsable(String login, String s, String prenom, String nom) {
+        Responsable responsable = new Responsable(login, s, prenom, nom);
+        return responsableRepository.save(responsable);
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<Responsable> getResponsable(Integer id) {
+        return responsableRepository.findById(id);
+    }
+
+    public List<Responsable> getResponsables() {
+        return responsableRepository.findAll();
+    }
+
+    public List<Agent> getAgents() {
+        return agentRepository.findAll();
     }
 }

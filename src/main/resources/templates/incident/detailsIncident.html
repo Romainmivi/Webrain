@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Détails de l'incident</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-4">
+    <h1>Détails de l'incident</h1>
+
+    <section id="incidentDetails">
+        <dl class="row">
+            <dt class="col-sm-3">Id</dt>
+            <dd class="col-sm-9" th:text="${incident.id}"></dd>
+            <dt class="col-sm-3">Équipement</dt>
+            <dd class="col-sm-9"
+                th:text="${incident.equipement.id + ' - ' + incident.equipement.description}"></dd>
+            <dt class="col-sm-3">Agent déclarant</dt>
+            <dd class="col-sm-9" th:text="${incident.agent.prenom + ' ' + incident.agent.nom}"></dd>
+            <dt class="col-sm-3">Prestataire</dt>
+            <dd class="col-sm-9"
+                th:text="${incident.prestataire != null ? incident.prestataire.nom : 'Aucun'}"></dd>
+            <dt class="col-sm-3">Date d'ouverture</dt>
+            <dd class="col-sm-9" th:text="${incident.dateOuverture}"></dd>
+            <dt class="col-sm-3">Statut</dt>
+            <dd class="col-sm-9" th:text="${incident.status}"></dd>
+            <dt class="col-sm-3">Date de clôture</dt>
+            <dd class="col-sm-9"
+                th:text="${incident.dateCloture != null ? incident.dateCloture : 'Non clôturé'}"></dd>
+            <dt class="col-sm-3">Description</dt>
+            <dd class="col-sm-9" th:text="${incident.description}"></dd>
+        </dl>
+        <button type="button" class="btn btn-primary" onclick="toggleEdit(true)">Modifier</button>
+    </section>
+
+    <form id="incidentForm" hidden
+          th:object="${incidentUpdate}"
+          th:action="@{/api/incidents/getIncident/{id}(id=${incident.id})}"
+          th:method="PUT">
+        <p><strong>Équipement :</strong>
+            <span th:text="${incident.equipement.id + ' - ' + incident.equipement.description}"></span>
+        </p>
+        <p><strong>Agent déclarant :</strong>
+            <span th:text="${incident.agent.prenom + ' ' + incident.agent.nom}"></span>
+        </p>
+        <p><strong>Date d'ouverture :</strong> <span th:text="${incident.dateOuverture}"></span></p>
+
+        <label class="form-label" for="status">Statut</label>
+        <select th:field="*{status}" class="form-select mb-3 w-50" required>
+            <option th:each="status : ${statutsIncident}"
+                    th:value="${status}"
+                    th:text="${status}">
+            </option>
+        </select>
+
+        <label class="form-label" for="prestataireId">Prestataire (facultatif)</label>
+        <select th:field="*{prestataireId}" class="form-select mb-3 w-50">
+            <option value="">Aucun prestataire</option>
+            <option th:each="prestataire : ${prestataires}"
+                    th:value="${prestataire.id}"
+                    th:text="${prestataire.nom}">
+            </option>
+        </select>
+
+        <label class="form-label" for="description">Description</label>
+        <textarea th:field="*{description}" class="form-control mb-3 w-50"
+                  maxlength="2000" rows="4" required></textarea>
+
+        <button type="submit" class="btn btn-success">Enregistrer</button>
+        <button type="button" class="btn btn-secondary" onclick="toggleEdit(false)">Annuler</button>
+    </form>
+
+    <hr>
+    <a th:href="@{/api/incidents/getIncidents}">Retour à la liste des incidents</a>
+</div>
+<script>
+    function toggleEdit(editing) {
+        document.getElementById("incidentDetails").hidden = editing;
+        document.getElementById("incidentForm").hidden = !editing;
+    }
+</script>
+</body>
+</html>

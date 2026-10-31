@@ -7,18 +7,20 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
-import java.sql.Date;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "incident")
 public class Incident {
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
@@ -31,21 +33,22 @@ public class Incident {
     }
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
-    private int id;
+    private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "equipement_id", nullable = false)
     private Equipement equipement;
 
-    @Column(name = "description", nullable = false, length = 1000)
+    @Column(name = "description", nullable = false, length = 2000)
     private String description;
 
     @Column(name = "date_ouverture", nullable = false)
-    private Date dateOuverture;
+    private LocalDateTime dateOuverture;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "statut", nullable = false, length = 20)
+    @Column(name = "statut", nullable = false, length = 100)
     private Status status;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -53,7 +56,7 @@ public class Incident {
     private Prestataire prestataire;
 
     @Column(name = "date_cloture")
-    private Date dateCloture;
+    private LocalDateTime dateCloture;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "agent_id", nullable = false)
@@ -62,8 +65,7 @@ public class Incident {
     protected Incident() {
     }
 
-    public Incident(int id, Equipement equipement, String description, Date dateOuverture, Prestataire prestataire, Agent agent) {
-        this.id = id;
+    public Incident(Equipement equipement, String description, LocalDateTime dateOuverture, Prestataire prestataire, Agent agent) {
         this.equipement = equipement;
         this.description = description;
         this.dateOuverture = dateOuverture;
@@ -72,8 +74,7 @@ public class Incident {
         this.prestataire = prestataire;
     }
 
-    public Incident(int id, Equipement equipement, String description, Date dateOuverture, Agent agent) {
-        this.id = id;
+    public Incident(Equipement equipement, String description, LocalDateTime dateOuverture, Agent agent) {
         this.equipement = equipement;
         this.description = description;
         this.dateOuverture = dateOuverture;
@@ -97,11 +98,11 @@ public class Incident {
         this.description = description;
     }
 
-    public Date getDateOuverture() {
+    public LocalDateTime getDateOuverture() {
         return dateOuverture;
     }
 
-    public void setDateOuverture(Date dateOuverture) {
+    public void setDateOuverture(LocalDateTime dateOuverture) {
         this.dateOuverture = dateOuverture;
     }
 
@@ -121,13 +122,12 @@ public class Incident {
         this.prestataire = prestataire;
     }
 
-    public Date getDateCloture() {
+    public LocalDateTime getDateCloture() {
         return dateCloture;
     }
 
-    public void setDateCloture(Date dateCloture) {
+    public void setDateCloture(LocalDateTime dateCloture) {
         this.dateCloture = dateCloture;
     }
-
 
 }

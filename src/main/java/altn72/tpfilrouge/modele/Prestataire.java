@@ -2,6 +2,8 @@ package altn72.tpfilrouge.modele;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
@@ -12,41 +14,30 @@ import java.util.Objects;
 public class Prestataire {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
-    private int id;
+    private Integer id;
 
     @Column(name = "nom", nullable = false, length = 100)
     private String nom;
 
-    @Column(name = "num_telephone", length = 30)
+    @Column(name = "num_telephone", nullable = false, length = 16)
     private String numTelephone;
 
-    @Column(name = "email", length = 150)
+    @Column(name = "email", nullable = false, length = 100)
     private String email;
 
     protected Prestataire() {
     }
 
-    private Prestataire(int id, String nom, String numTelephone, String email) {
-        this.id = id;
+    private Prestataire(String nom, String numTelephone, String email) {
         this.nom = Objects.requireNonNull(nom, "nom obligatoire");
-        if (numTelephone == null && email == null) {
-            throw new IllegalArgumentException("Au moins un moyen de contact est requis");
-        }
-        this.numTelephone = numTelephone;
-        this.email = email;
+        this.numTelephone = Objects.requireNonNull(numTelephone, "numéro de téléphone obligatoire");
+        this.email = Objects.requireNonNull(email, "email obligatoire");
     }
 
-    public static Prestataire avecTelephoneEtEmail(int id, String nom, String tel, String email) {
-        return new Prestataire(id, nom, Objects.requireNonNull(tel), Objects.requireNonNull(email));
-    }
-
-    public static Prestataire avecEmail(int id, String nom, String email) {
-        return new Prestataire(id, nom, null, Objects.requireNonNull(email));
-    }
-
-    public static Prestataire avecTelephone(int id, String nom, String tel) {
-        return new Prestataire(id, nom, Objects.requireNonNull(tel), null);
+    public static Prestataire creer(String nom, String numTelephone, String email) {
+        return new Prestataire(nom, numTelephone, email);
     }
 
     public String getNom() {
@@ -73,7 +64,7 @@ public class Prestataire {
         this.email = email;
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 }

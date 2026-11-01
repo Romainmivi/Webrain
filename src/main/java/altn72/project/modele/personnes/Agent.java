@@ -1,0 +1,20 @@
+package altn72.project.modele.personnes;
+
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+
+@Entity
+@DiscriminatorValue("AGENT")
+public class Agent extends Personne{
+
+    protected Agent() {
+    }
+
+    protected Agent(int id, String login, String motDePasse, String prenom, String nom) {
+        super(id, login, motDePasse, prenom, nom);
+    }
+
+    public Agent(String login, String motDePasse, String prenom, String nom) {
+        super(null, login, motDePasse, prenom, nom);
+    }
+}

@@ -2,32 +2,66 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Un agent</title>
+    <title>Détails de l'équipement</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
 <div class="container mt-4">
-    <h1>Details équipement</h1>
+    <h1>Détails de l'équipement</h1>
 
-    <form th:object="${equipement}" th:action="@{/api/equipements/getEquipement/{idEquipement}(idEquipement=${equipement.id})}" th:method="PUT">
+    <section id="equipementDetails">
+        <dl class="row">
+            <dt class="col-sm-3">Id</dt>
+            <dd class="col-sm-9" th:text="${equipement.id}"></dd>
+            <dt class="col-sm-3">Description</dt>
+            <dd class="col-sm-9" th:text="${equipement.description}"></dd>
+            <dt class="col-sm-3">Type</dt>
+            <dd class="col-sm-9" th:text="${equipement.type.libelle}"></dd>
+            <dt class="col-sm-3">Station</dt>
+            <dd class="col-sm-9" th:text="${equipement.station.nom}"></dd>
+            <dt class="col-sm-3">État</dt>
+            <dd class="col-sm-9" th:text="${equipement.etat}"></dd>
+        </dl>
+        <button type="button" class="btn btn-primary" onclick="toggleEdit(true)">Modifier</button>
+    </section>
 
-        <label class="form-label" for="nom">Description</label>
-        <input type="text" th:field="*{description}" class="form-control mb-3 w-50">
+    <form id="equipementForm" hidden
+          th:action="@{/api/equipements/getEquipement/{id}(id=${equipement.id})}"
+          th:object="${equipementUpdate}"
+          th:method="PUT">
+        <p class="mb-3"><strong>Type :</strong> <span th:text="${equipement.type.libelle}"></span>
+            <small class="text-muted">(le type détermine la catégorie de l'équipement et n'est pas modifiable)</small>
+        </p>
+        <label class="form-label" for="description">Description</label>
+        <input type="text" th:field="*{description}" class="form-control mb-3 w-50" maxlength="200">
 
-        <label class="form-label" for="prenom">Type</label>
-        <input type="text" th:field="*{type}" class="form-control mb-3 w-50">
+        <label class="form-label" for="idStation">Station</label>
+        <select th:field="*{idStation}" class="form-select mb-3 w-50" required>
+            <option th:each="station : ${stationsDisponible}"
+                    th:value="${station.id}"
+                    th:text="${station.nom}">
+            </option>
+        </select>
 
-        <label class="form-label" for="Station">Station</label>
-        <input type="text" th:field="*{station.nom}" class="form-control mb-3 w-50">
-
-        <label class="form-label" for="Etat">État</label>
-        <input type="text" th:field="*{etat}" class="form-control mb-3 w-50">
-
-        <button type="submit" class="btn btn-primary">Validez modifications</button>
+        <label class="form-label" for="etat">État</label>
+        <select th:field="*{etat}" class="form-select mb-3 w-50" required>
+            <option th:each="etat : ${etatsEquipement}"
+                    th:value="${etat}"
+                    th:text="${etat}">
+            </option>
+        </select>
+        <button type="submit" class="btn btn-success">Enregistrer</button>
+        <button type="button" class="btn btn-secondary" onclick="toggleEdit(false)">Annuler</button>
     </form>
 
     <hr>
-    <a th:href="@{/api/equipements/getEquipements}">Afficher la liste des équipement</a>
+    <a th:href="@{/api/equipements/getEquipements}">Retour à la liste des équipements</a>
 </div>
+<script>
+    function toggleEdit(editing) {
+        document.getElementById("equipementDetails").hidden = editing;
+        document.getElementById("equipementForm").hidden = !editing;
+    }
+</script>
 </body>
 </html>

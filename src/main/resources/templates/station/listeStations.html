@@ -28,7 +28,7 @@
             <td th:text="${station.ville}"></td>
             <td>
                 <form th:action="@{/api/stations/getStation/{idStation}(idStation=${station.id})}" style="display:inline;">
-                    <button class="btn btn-info btn-sm">Modifiez</button>
+                    <button class="btn btn-info btn-sm">Détails</button>
                 </form>
 
                 <form th:action="@{/api/stations/station/{idStation}(idStation=${station.id})}" th:method="DELETE" style="display:inline;">

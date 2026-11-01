@@ -3,6 +3,8 @@ package altn72.tpfilrouge.service;
 import altn72.tpfilrouge.modele.Station;
 import altn72.tpfilrouge.modele.StationRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -30,6 +32,16 @@ public class StationService {
 
     public Optional<Station> getStation(Integer id) {
         return stationRepository.findById(id);
+    }
+
+    @Transactional
+    public Optional<Station> modifierStation(Integer id, String nom, String adresse, String ville) {
+        return stationRepository.findById(id).map(station -> {
+            station.setNom(nom);
+            station.setAdresse(adresse);
+            station.setVille(ville);
+            return station;
+        });
     }
 
     public boolean supprimerStation(Integer idStation) {

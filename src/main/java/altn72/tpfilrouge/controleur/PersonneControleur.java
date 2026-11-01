@@ -54,6 +54,13 @@ public class PersonneControleur {
         return "agent/detailsAgent";
     }
 
+    @PutMapping("/getAgent/{id}")
+    public String modifierAgent(@PathVariable Integer id, @ModelAttribute PersonneRequest request) {
+        personneService.modifierAgent(id, request.login(), request.prenom(), request.nom())
+                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Agent introuvable"));
+        return "redirect:/api/personnes/getAgent/" + id;
+    }
+
     @DeleteMapping("/agent/{idAgent}")
     public String deleteAgent(@PathVariable("idAgent") Integer idAgent) {
         if (!personneService.supprimerAgent(idAgent)) {
@@ -82,7 +89,7 @@ public class PersonneControleur {
 
     // A revoir
     @PostMapping("/addResponsable")
-    public String ajouterResponsable(@ModelAttribute AgentRequest request) {
+    public String ajouterResponsable(@ModelAttribute ResponsableRequest request) {
         Responsable responsable = personneService.ajouterResponsable(
                 request.login(),
                 request.motDePasse(),
@@ -100,6 +107,13 @@ public class PersonneControleur {
         return "responsable/detailsResponsable";
     }
 
+    @PutMapping("/getResponsable/{id}")
+    public String modifierResponsable(@PathVariable Integer id, @ModelAttribute PersonneRequest request) {
+        personneService.modifierResponsable(id, request.login(), request.prenom(), request.nom())
+                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Responsable introuvable"));
+        return "redirect:/api/personnes/getResponsable/" + id;
+    }
+
     @DeleteMapping("/responsable/{idResponsable}")
     public String deleteResponsable(@PathVariable("idResponsable") Integer idResponsable) {
         if (!personneService.supprimerResponsable(idResponsable)) {
@@ -110,6 +124,9 @@ public class PersonneControleur {
     }
 
     public record ResponsableRequest(String login, String motDePasse, String prenom, String nom) {
+    }
+
+    public record PersonneRequest(String login, String prenom, String nom) {
     }
 
 }

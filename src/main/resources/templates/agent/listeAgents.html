@@ -28,7 +28,7 @@
             <td th:text="${agent.login}"></td>
             <td>
                 <form th:action="@{/api/personnes/getAgent/{idAgent}(idAgent=${agent.id})}" style="display:inline;">
-                    <button class="btn btn-info btn-sm">Modifiez</button>
+                    <button class="btn btn-info btn-sm">Détails</button>
                 </form>
 
                 <form th:action="@{/api/personnes/agent/{idAgent}(idAgent=${agent.id})}" th:method="DELETE" style="display:inline;">

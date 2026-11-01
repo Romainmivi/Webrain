@@ -28,7 +28,7 @@
             <td th:text="${responsable.login}"></td>
             <td>
                 <form th:action="@{/api/personnes/getResponsable/{idResponsable}(idResponsable=${responsable.id})}" style="display:inline;">
-                    <button class="btn btn-info btn-sm">Modifiez</button>
+                    <button class="btn btn-info btn-sm">Détails</button>
                 </form>
 
                 <form th:action="@{/api/personnes/responsable/{idResponsable}(idResponsable=${responsable.id})}" th:method="DELETE" style="display:inline;">

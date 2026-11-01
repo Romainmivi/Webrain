@@ -29,7 +29,7 @@
             <td th:text="${equipement.etat}"></td>
             <td>
                 <form th:action="@{/api/equipements/getEquipement/{idEquipement}(idEquipement=${equipement.id})}" style="display:inline;">
-                    <button class="btn btn-info btn-sm">Modifiez</button>
+                    <button class="btn btn-info btn-sm">Détails</button>
                 </form>
 
                 <form th:action="@{/api/equipements/equipement/{idEquipement}(idEquipement=${equipement.id})}" th:method="DELETE" style="display:inline;">

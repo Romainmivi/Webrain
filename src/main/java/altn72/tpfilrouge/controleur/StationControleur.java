@@ -55,6 +55,14 @@ public class StationControleur {
         return "station/detailsStation";
     }
 
+    @PutMapping("/getStation/{id}")
+    public String modifierStation(@PathVariable Integer id, @ModelAttribute StationRequest request) {
+        stationService.modifierStation(id, request.nom(), request.adresse(), request.ville())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Station introuvable"));
+        return "redirect:/api/stations/getStation/" + id;
+    }
+
     @DeleteMapping("/station/{idStation}")
     public String deleteStation(@PathVariable Integer idStation) {
         if (!stationService.supprimerStation(idStation)) {

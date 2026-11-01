@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -62,7 +63,28 @@ public class EquipementControleur {
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Équipement introuvable"));
         model.addAttribute("equipement", equipement);
+        model.addAttribute("equipementUpdate", new EquipementUpdateRequest(
+                equipement.getDescription(),
+                equipement.getStation().getId(),
+                equipement.getEtat()
+        ));
+        model.addAttribute("stationsDisponible", stationService.getStations());
+        model.addAttribute("etatsEquipement", Equipement.Etat.values());
         return "equipement/detailsEquipement";
+    }
+
+    @PutMapping("/getEquipement/{id}")
+    public String modifierEquipement(
+            @PathVariable Integer id,
+            @ModelAttribute EquipementUpdateRequest request
+    ) {
+        var station = stationService.getStation(request.idStation())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Station introuvable"));
+        equipementService.modifierEquipement(id, request.description(), station, request.etat())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Équipement introuvable"));
+        return "redirect:/api/equipements/getEquipement/" + id;
     }
 
     @DeleteMapping("/equipement/{idEquipement}")
@@ -78,6 +100,13 @@ public class EquipementControleur {
     public record EquipementRequest(
             String description,
             TypeEquipement typeEquipement,
+            Integer idStation,
+            Equipement.Etat etat
+    ) {
+    }
+
+    public record EquipementUpdateRequest(
+            String description,
             Integer idStation,
             Equipement.Etat etat
     ) {

@@ -9,21 +9,40 @@
 <div class="container mt-4">
     <h1>Détails du prestataire</h1>
 
-    <dl class="row">
-        <dt class="col-sm-2">Id</dt>
-        <dd class="col-sm-10" th:text="${prestataire.id}"></dd>
+    <section id="prestataireDetails">
+        <dl class="row">
+            <dt class="col-sm-3">Nom</dt>
+            <dd class="col-sm-9" th:text="${prestataire.nom}"></dd>
+            <dt class="col-sm-3">Téléphone</dt>
+            <dd class="col-sm-9" th:text="${prestataire.numTelephone}"></dd>
+            <dt class="col-sm-3">Email</dt>
+            <dd class="col-sm-9" th:text="${prestataire.email}"></dd>
+        </dl>
+        <button type="button" class="btn btn-primary" onclick="toggleEdit(true)">Modifier</button>
+    </section>
 
-        <dt class="col-sm-2">Nom</dt>
-        <dd class="col-sm-10" th:text="${prestataire.nom}"></dd>
+    <form id="prestataireForm" hidden
+          th:object="${prestataire}"
+          th:action="@{/api/prestataires/getPrestataire/{id}(id=${prestataire.id})}"
+          th:method="PUT">
+        <label class="form-label" for="nom">Nom</label>
+        <input type="text" th:field="*{nom}" class="form-control mb-3 w-50" maxlength="100" required>
+        <label class="form-label" for="numTelephone">Téléphone</label>
+        <input type="tel" th:field="*{numTelephone}" class="form-control mb-3 w-50" maxlength="16" required>
+        <label class="form-label" for="email">Email</label>
+        <input type="email" th:field="*{email}" class="form-control mb-3 w-50" maxlength="100" required>
+        <button type="submit" class="btn btn-success">Enregistrer</button>
+        <button type="button" class="btn btn-secondary" onclick="toggleEdit(false)">Annuler</button>
+    </form>
 
-        <dt class="col-sm-2">Téléphone</dt>
-        <dd class="col-sm-10" th:text="${prestataire.numTelephone}"></dd>
-
-        <dt class="col-sm-2">Email</dt>
-        <dd class="col-sm-10" th:text="${prestataire.email}"></dd>
-    </dl>
-
+    <hr>
     <a th:href="@{/api/prestataires/getPrestataires}">Retour à la liste des prestataires</a>
 </div>
+<script>
+    function toggleEdit(editing) {
+        document.getElementById("prestataireDetails").hidden = editing;
+        document.getElementById("prestataireForm").hidden = !editing;
+    }
+</script>
 </body>
 </html>

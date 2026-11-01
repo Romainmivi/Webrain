@@ -11,6 +11,7 @@ import altn72.tpfilrouge.modele.equipements.EquipementRepository;
 import altn72.tpfilrouge.modele.equipements.Portiques;
 import altn72.tpfilrouge.modele.equipements.TypeEquipement;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -47,6 +48,21 @@ public class EquipementService {
             case PORTIQUE -> new Portiques(description, typeEquipement, station, etat);
         };
         return equipementRepository.save(equipement);
+    }
+
+    @Transactional
+    public Optional<Equipement> modifierEquipement(
+            Integer id,
+            String description,
+            Station station,
+            Equipement.Etat etat
+    ) {
+        return equipementRepository.findById(id).map(equipement -> {
+            equipement.setDescription(description);
+            equipement.setStation(station);
+            equipement.setEtat(etat);
+            return equipement;
+        });
     }
 
     public boolean supprimerEquipement(Integer idEquipement) {

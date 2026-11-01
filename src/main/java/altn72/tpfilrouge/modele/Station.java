@@ -77,6 +77,10 @@ public class Station {
         return adresse;
     }
 
+    public void setAdresse(String adresse) {
+        this.adresse = adresse;
+    }
+
     public void setNom(String nom){
         this.nom = nom;
     }

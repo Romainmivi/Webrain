@@ -32,6 +32,16 @@ public class PersonneService {
         return agentRepository.findById(id);
     }
 
+    @Transactional
+    public Optional<Agent> modifierAgent(Integer id, String login, String prenom, String nom) {
+        return agentRepository.findById(id).map(agent -> {
+            agent.setLogin(login);
+            agent.setPrenom(prenom);
+            agent.setNom(nom);
+            return agent;
+        });
+    }
+
 
     @Transactional
     public Responsable ajouterResponsable(String login, String s, String prenom, String nom) {
@@ -42,6 +52,16 @@ public class PersonneService {
     @Transactional(readOnly = true)
     public Optional<Responsable> getResponsable(Integer id) {
         return responsableRepository.findById(id);
+    }
+
+    @Transactional
+    public Optional<Responsable> modifierResponsable(Integer id, String login, String prenom, String nom) {
+        return responsableRepository.findById(id).map(responsable -> {
+            responsable.setLogin(login);
+            responsable.setPrenom(prenom);
+            responsable.setNom(nom);
+            return responsable;
+        });
     }
 
     public List<Responsable> getResponsables() {

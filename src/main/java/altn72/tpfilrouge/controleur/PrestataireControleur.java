@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -55,6 +56,22 @@ public class PrestataireControleur {
                         HttpStatus.NOT_FOUND, "Prestataire introuvable"));
         model.addAttribute("prestataire", prestataire);
         return "prestataire/detailsPrestataire";
+    }
+
+    @PutMapping("/getPrestataire/{id}")
+    public String modifierPrestataire(
+            @PathVariable Integer id,
+            @ModelAttribute PrestataireRequest request
+    ) {
+        prestataireService.modifierPrestataire(
+                        id,
+                        request.nom(),
+                        request.numTelephone(),
+                        request.email()
+                )
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Prestataire introuvable"));
+        return "redirect:/api/prestataires/getPrestataire/" + id;
     }
 
     @DeleteMapping("/prestataire/{idPrestataire}")

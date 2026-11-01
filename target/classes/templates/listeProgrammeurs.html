@@ -48,7 +48,7 @@
                 <!--/* 5.12.1 -- Bouton "Modifiez" : un formulaire GET vers /programmeurs/{id}, qui affiche la page detailsProgrammeur (formulaire prérempli).
                        @{...} construit une URL (en tenant compte du contexte de l'application) ; (idProgrammeur=...) renseigne la variable {idProgrammeur} de la route. */-->
                 <form th:action="@{/programmeurs/{idProgrammeur}(idProgrammeur=${programmeur.id})}" style="display:inline;">
-                    <button class="btn btn-info btn-sm">Modifiez</button>
+                    <button class="btn btn-info btn-sm">Détails</button>
                 </form>
 
                 <!--/* 5.10.1 -- 1re version du bouton "Supprimez" : un formulaire POST ordinaire.

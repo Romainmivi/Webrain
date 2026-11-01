@@ -16,4 +16,7 @@ public interface IncidentRepository extends JpaRepository<Incident, Integer> {
 
     @EntityGraph(attributePaths = {"equipement", "agent", "prestataire"})
     Optional<Incident> findWithDetailsById(Integer id);
+
+    @EntityGraph(attributePaths = {"equipement", "agent", "prestataire"})
+    List<Incident> findByStatusAndPrestataireIsNotNull(Incident.Status status);
 }

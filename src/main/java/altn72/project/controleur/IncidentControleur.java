@@ -81,6 +81,7 @@ public class IncidentControleur {
         ));
         model.addAttribute("statutsIncident", Incident.Status.values());
         model.addAttribute("prestataires", prestataireService.getPrestataires());
+        model.addAttribute("incidentEvaluable", incident.getStatus() == Incident.Status.CLOTURE && incident.getPrestataire() != null);
         return "incident/detailsIncident";
     }
 

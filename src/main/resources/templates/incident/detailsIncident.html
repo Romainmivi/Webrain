@@ -32,6 +32,11 @@
             <dd class="col-sm-9" th:text="${incident.description}"></dd>
         </dl>
         <button type="button" class="btn btn-primary" onclick="toggleEdit(true)">Modifier</button>
+        <a th:if="${incidentEvaluable}"
+           class="btn btn-success"
+           th:href="@{/api/evaluations/evaluation/nouveau(incidentId=${incident.id})}">
+            Évaluer le prestataire
+        </a>
     </section>
 
     <form id="incidentForm" hidden
@@ -73,6 +78,8 @@
 
     <hr>
     <a th:href="@{/api/incidents/getIncidents}">Retour à la liste des incidents</a>
+    <span class="mx-2">|</span>
+    <a th:href="@{/api/evaluations/getEvaluations}">Liste des évaluations</a>
 </div>
 <script>
     function toggleEdit(editing) {

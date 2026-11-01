@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Évaluer un prestataire</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-4">
+    <h1>Évaluer un prestataire</h1>
+
+    <div th:if="${#lists.isEmpty(incidents)}" class="alert alert-info">
+        Aucun incident clôturé avec prestataire ne peut être évalué.
+    </div>
+
+    <form th:unless="${#lists.isEmpty(incidents)}"
+          th:action="@{/api/evaluations/addEvaluation}"
+          th:object="${nouvelleEvaluation}"
+          method="POST">
+        <label class="form-label" for="incidentId">Incident et prestataire</label>
+        <select th:field="*{incidentId}" class="form-select mb-3 w-50" required>
+            <option value="" disabled>Choisir un incident clôturé</option>
+            <option th:each="incident : ${incidents}"
+                    th:value="${incident.id}"
+                    th:text="${'Incident #' + incident.id + ' — ' + incident.prestataire.nom}">
+            </option>
+        </select>
+
+        <label class="form-label" for="note">Note (0 à 5)</label>
+        <select th:field="*{note}" class="form-select mb-3 w-50" required>
+            <option value="" disabled>Choisir une note</option>
+            <option th:each="note : ${#numbers.sequence(0, 5)}"
+                    th:value="${note}"
+                    th:text="${note}">
+            </option>
+        </select>
+
+        <label class="form-label" for="commentaire">Commentaire (facultatif)</label>
+        <textarea th:field="*{commentaire}" class="form-control mb-3 w-50"
+                  maxlength="1000" rows="4"></textarea>
+
+        <button type="submit" class="btn btn-primary">Enregistrer l'évaluation</button>
+    </form>
+
+    <hr>
+    <a th:href="@{/api/evaluations/getEvaluations}">Afficher les évaluations</a>
+</div>
+</body>
+</html>

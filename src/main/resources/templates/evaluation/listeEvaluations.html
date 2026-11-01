@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Évaluations des prestataires</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-4">
+    <h1>Évaluations des prestataires</h1>
+
+    <table class="table table-striped table-hover align-middle">
+        <thead>
+        <tr>
+            <th>Id</th>
+            <th>Prestataire</th>
+            <th>Incident</th>
+            <th>Note</th>
+            <th>Date</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="evaluation : ${evaluations}">
+            <td th:text="${evaluation.id}"></td>
+            <td th:text="${evaluation.incident.prestataire.nom}"></td>
+            <td th:text="${evaluation.incident.id}"></td>
+            <td th:text="${evaluation.note + ' / 5'}"></td>
+            <td th:text="${evaluation.date}"></td>
+            <td>
+                <a class="btn btn-info btn-sm"
+                   th:href="@{/api/evaluations/getEvaluation/{id}(id=${evaluation.id})}">Détails</a>
+            </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(evaluations)}">
+            <td colspan="6" class="text-center text-muted">Aucune évaluation.</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <a class="btn btn-primary" th:href="@{/api/evaluations/evaluation/nouveau}">Évaluer un prestataire</a>
+    <a class="btn btn-outline-secondary" th:href="@{/api/incidents/getIncidents}">Retour aux incidents</a>
+</div>
+</body>
+</html>

@@ -3,4 +3,6 @@ package altn72.project.modele.personnes;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PersonneRepository extends JpaRepository<Personne, Integer> {
+
+    Personne findByLogin(String login);
 }

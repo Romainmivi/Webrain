@@ -2,8 +2,11 @@ package altn72.project.service;
 
 import altn72.project.modele.personnes.Agent;
 import altn72.project.modele.personnes.AgentRepository;
+import altn72.project.modele.personnes.Personne;
+import altn72.project.modele.personnes.PersonneRepository;
 import altn72.project.modele.personnes.Responsable;
 import altn72.project.modele.personnes.ResponsableRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -15,15 +18,20 @@ public class PersonneService {
 
     private final AgentRepository agentRepository;
     private final ResponsableRepository responsableRepository;
+    private final PersonneRepository personneRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public PersonneService(AgentRepository agentRepository, ResponsableRepository responsableRepository) {
+    public PersonneService(AgentRepository agentRepository, ResponsableRepository responsableRepository, PersonneRepository personneRepository, PasswordEncoder passwordEncoder) {
         this.agentRepository = agentRepository;
         this.responsableRepository = responsableRepository;
+        this.personneRepository = personneRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional
     public Agent ajouterAgent(String login, String motDePasse, String prenom, String nom) {
-        Agent agent = new Agent(login, motDePasse, prenom, nom);
+        String motDePasseHash = passwordEncoder.encode(motDePasse);
+        Agent agent = new Agent(login, motDePasseHash, prenom, nom);
         return agentRepository.save(agent);
     }
 
@@ -45,7 +53,8 @@ public class PersonneService {
 
     @Transactional
     public Responsable ajouterResponsable(String login, String s, String prenom, String nom) {
-        Responsable responsable = new Responsable(login, s, prenom, nom);
+        String motDePasseHash = passwordEncoder.encode(s);
+        Responsable responsable = new Responsable(login, motDePasseHash, prenom, nom);
         return responsableRepository.save(responsable);
     }
 
@@ -83,5 +92,25 @@ public class PersonneService {
         if (!responsableRepository.existsById(idResponsable)) return false;
         responsableRepository.deleteById(idResponsable);
         return true;
+    }
+
+    /**
+     * Migre les mots de passe en clair vers BCrypt.
+     * Un mot de passe est considéré comme déjà hashé s'il commence par "$2a$" ou "$2b$".
+     * @return le nombre de mots de passe migrés
+     */
+    @Transactional
+    public int migrerMotsDePasse() {
+        List<Personne> personnes = personneRepository.findAll();
+        int count = 0;
+        for (Personne personne : personnes) {
+            String motDePasse = personne.getMotDePasse();
+            if (motDePasse != null && !motDePasse.startsWith("$2a$") && !motDePasse.startsWith("$2b$")) {
+                personne.setMotDePasse(passwordEncoder.encode(motDePasse));
+                personneRepository.save(personne);
+                count++;
+            }
+        }
+        return count;
     }
 }

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <div class="container-fluid">
+        <a class="navbar-brand" th:href="@{/dashboard}">Webrain</a>
+        <div class="navbar-nav ms-auto">
+            <span class="nav-item nav-link text-light">
+                <span sec:authentication="name">Utilisateur</span>
+                <span class="badge bg-secondary" sec:authorize="hasRole('AGENT')">Agent</span>
+                <span class="badge bg-primary" sec:authorize="hasRole('RESPONSABLE')">Responsable</span>
+            </span>
+            <form th:action="@{/api/auth/logout}" method="POST" style="display:inline;">
+                <button type="submit" class="btn btn-outline-light btn-sm ms-2">Déconnexion</button>
+            </form>
+        </div>
+    </div>
+</nav>

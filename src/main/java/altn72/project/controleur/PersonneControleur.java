@@ -82,7 +82,7 @@ public class PersonneControleur {
     }
 
     @GetMapping("/responsable/nouveau")
-    public String preparerAjoutProgrammeur(Model model) {
+    public String preparerAjoutResponsable(Model model) {
         model.addAttribute("nouveauResponsable", new ResponsableRequest("","", "", ""));
         return "responsable/nouveauResponsable";
     }

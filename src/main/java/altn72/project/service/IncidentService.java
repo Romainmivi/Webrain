@@ -24,6 +24,8 @@ import java.util.Optional;
 @Service
 public class IncidentService {
 
+    private static final int LONGUEUR_MAX_APERCU = 100;
+
     private final IncidentRepository incidentRepository;
     private final EquipementRepository equipementRepository;
     private final AgentRepository agentRepository;
@@ -82,16 +84,12 @@ public class IncidentService {
         );
         Incident savedIncident = incidentRepository.save(incident);
 
-        // Publier l'événement de création
-        eventPublisher.publishEvent(new IncidentChangeEvent(
-                this,
-                savedIncident.getId(),
-                description,
+        publierEvenement(
+                savedIncident,
+                agent,
                 IncidentChangeEvent.ChangeType.INCIDENT_CREE,
-                "Incident créé par " + agent.getPrenom() + " " + agent.getNom() + " pour l'équipement " + equipement.getDescription(),
-                LocalDateTime.now(),
-                agent
-        ));
+                "Incident créé par " + agent.getPrenom() + " " + agent.getNom() + " pour l'équipement " + equipement.getDescription()
+        );
 
         return savedIncident;
     }
@@ -117,6 +115,7 @@ public class IncidentService {
                 String ancienneDescription = incident.getDescription();
                 Incident.Status ancienStatut = incident.getStatus();
                 Prestataire ancienPrestataire = incident.getPrestataire();
+                Agent agent = incident.getAgent();
 
                 incident.setDescription(description);
                 mettreAJourStatut(incident, status);
@@ -124,51 +123,40 @@ public class IncidentService {
 
                 Incident savedIncident = incidentRepository.save(incident);
 
-                // Publier les événements pour chaque changement
                 if (!ancienneDescription.equals(description)) {
-                    eventPublisher.publishEvent(new IncidentChangeEvent(
-                            this,
-                            savedIncident.getId(),
-                            savedIncident.getDescription(),
+                    String apercuAncien = ancienneDescription.substring(0, Math.min(ancienneDescription.length(), LONGUEUR_MAX_APERCU)) + "...";
+                    String apercuNouveau = description.substring(0, Math.min(description.length(), LONGUEUR_MAX_APERCU)) + "...";
+                    publierEvenement(
+                            savedIncident,
+                            agent,
                             IncidentChangeEvent.ChangeType.DESCRIPTION_MODIFIEE,
-                            "Description modifiée par " + incident.getAgent().getPrenom() + " " + incident.getAgent().getNom() + " : \"" + ancienneDescription.substring(0, Math.min(ancienneDescription.length(), 100)) + "...\" → \"" + description.substring(0, Math.min(description.length(), 100)) + "...\"",
-                            LocalDateTime.now(),
-                            incident.getAgent()
-                    ));
+                            "Description modifiée par " + agent.getPrenom() + " " + agent.getNom() + " : \"" + apercuAncien + "\" → \"" + apercuNouveau + "\""
+                    );
                 }
 
                 if (ancienStatut != status) {
-                    eventPublisher.publishEvent(new IncidentChangeEvent(
-                            this,
-                            savedIncident.getId(),
-                            savedIncident.getDescription(),
+                    publierEvenement(
+                            savedIncident,
+                            agent,
                             IncidentChangeEvent.ChangeType.STATUT_MODIFIE,
-                            "Statut modifié de " + ancienStatut + " à " + status + " par " + incident.getAgent().getPrenom() + " " + incident.getAgent().getNom(),
-                            LocalDateTime.now(),
-                            incident.getAgent()
-                    ));
+                            "Statut modifié de " + ancienStatut + " à " + status + " par " + agent.getPrenom() + " " + agent.getNom()
+                    );
                 }
 
                 if (prestataire != null && (ancienPrestataire == null || !prestataire.getId().equals(ancienPrestataire.getId()))) {
-                    eventPublisher.publishEvent(new IncidentChangeEvent(
-                            this,
-                            savedIncident.getId(),
-                            savedIncident.getDescription(),
+                    publierEvenement(
+                            savedIncident,
+                            agent,
                             IncidentChangeEvent.ChangeType.PRESTATAIRE_AFFECTE,
-                            "Prestataire affecté : " + prestataire.getNom() + " par " + incident.getAgent().getPrenom() + " " + incident.getAgent().getNom(),
-                            LocalDateTime.now(),
-                            incident.getAgent()
-                    ));
+                            "Prestataire affecté : " + prestataire.getNom() + " par " + agent.getPrenom() + " " + agent.getNom()
+                    );
                 } else if (prestataire == null && ancienPrestataire != null) {
-                    eventPublisher.publishEvent(new IncidentChangeEvent(
-                            this,
-                            savedIncident.getId(),
-                            savedIncident.getDescription(),
+                    publierEvenement(
+                            savedIncident,
+                            agent,
                             IncidentChangeEvent.ChangeType.PRESTATAIRE_DESACTIVER,
-                            "Prestataire désactivé : " + ancienPrestataire.getNom() + " par " + incident.getAgent().getPrenom() + " " + incident.getAgent().getNom(),
-                            LocalDateTime.now(),
-                            incident.getAgent()
-                    ));
+                            "Prestataire désactivé : " + ancienPrestataire.getNom() + " par " + agent.getPrenom() + " " + agent.getNom()
+                    );
                 }
 
                 return savedIncident;
@@ -186,16 +174,12 @@ public class IncidentService {
         mettreAJourStatut(incident, nouveauStatut);
         Incident savedIncident = incidentRepository.save(incident);
 
-        // Publier l'événement de changement de statut
-        eventPublisher.publishEvent(new IncidentChangeEvent(
-                this,
-                savedIncident.getId(),
-                savedIncident.getDescription(),
+        publierEvenement(
+                savedIncident,
+                incident.getAgent(),
                 IncidentChangeEvent.ChangeType.STATUT_MODIFIE,
-                "Statut modifié de " + ancienStatut + " à " + nouveauStatut + " par " + incident.getAgent().getPrenom() + " " + incident.getAgent().getNom(),
-                LocalDateTime.now(),
-                incident.getAgent()
-        ));
+                "Statut modifié de " + ancienStatut + " à " + nouveauStatut + " par " + incident.getAgent().getPrenom() + " " + incident.getAgent().getNom()
+        );
 
         return savedIncident;
     }
@@ -220,7 +204,6 @@ public class IncidentService {
         Incident incident = incidentRepository.findWithDetailsById(id)
                 .orElse(null);
         if (incident != null) {
-            // Publier l'événement de suppression avant de supprimer
             eventPublisher.publishEvent(new IncidentChangeEvent(
                     this,
                     id,
@@ -233,5 +216,17 @@ public class IncidentService {
         }
         incidentRepository.deleteById(id);
         return true;
+    }
+
+    private void publierEvenement(Incident incident, Agent agent, IncidentChangeEvent.ChangeType type, String description) {
+        eventPublisher.publishEvent(new IncidentChangeEvent(
+                this,
+                incident.getId(),
+                incident.getDescription(),
+                type,
+                description,
+                LocalDateTime.now(),
+                agent
+        ));
     }
 }

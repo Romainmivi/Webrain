@@ -4,15 +4,12 @@ import altn72.project.modele.Incident;
 import altn72.project.modele.IncidentEvent;
 import altn72.project.modele.IncidentEventRepository;
 import altn72.project.modele.IncidentRepository;
-import altn72.project.modele.personnes.Agent;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
 
 @Component
 public class IncidentChangeListener {

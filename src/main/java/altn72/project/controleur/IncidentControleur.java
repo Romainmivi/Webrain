@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
-import java.util.ArrayList;
 
 @Controller
 @RequestMapping("/api/incidents")
@@ -83,7 +82,6 @@ public class IncidentControleur {
         model.addAttribute("prestataires", prestataireService.getPrestataires());
         model.addAttribute("incidentEvaluable", incident.getStatus() == Incident.Status.CLOTURE && incident.getPrestataire() != null);
 
-        // Charger l'historique des événements
         List<IncidentEvent> historique = incidentService.getHistorique(id);
         model.addAttribute("historique", historique);
 

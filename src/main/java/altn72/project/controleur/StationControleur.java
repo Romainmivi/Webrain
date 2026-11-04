@@ -6,13 +6,18 @@ import altn72.project.modele.Station;
 import altn72.project.service.StationService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
 
 @Controller
 @RequestMapping("/api/stations")
-
 public class StationControleur {
 
     private final StationService stationService;
@@ -28,7 +33,6 @@ public class StationControleur {
         return "station/listeStations";
     }
 
-    //Revoir le model necessaire ?
     @GetMapping("/station/nouveau")
     public String preparerAjoutStation(Model model) {
         model.addAttribute("nouvelleStation", new StationRequest("", "", ""));

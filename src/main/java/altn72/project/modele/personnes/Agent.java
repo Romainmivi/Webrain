@@ -5,7 +5,7 @@ import jakarta.persistence.Entity;
 
 @Entity
 @DiscriminatorValue("AGENT")
-public class Agent extends Personne{
+public class Agent extends Personne {
 
     protected Agent() {
     }

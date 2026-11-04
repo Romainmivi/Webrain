@@ -33,7 +33,7 @@ public class AuthControleur {
             return "redirect:/login";
         }
 
-        for (var authority : authentication.getAuthorities()) {
+        for (org.springframework.security.core.GrantedAuthority authority : authentication.getAuthorities()) {
             if (authority instanceof SimpleGrantedAuthority) {
                 String role = ((SimpleGrantedAuthority) authority).getAuthority();
                 if ("ROLE_AGENT".equals(role)) {

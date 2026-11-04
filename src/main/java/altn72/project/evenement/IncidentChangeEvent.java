@@ -1,7 +1,5 @@
 package altn72.project.evenement;
 
-import altn72.project.modele.Incident;
-import altn72.project.modele.IncidentEvent;
 import altn72.project.modele.personnes.Agent;
 import org.springframework.context.ApplicationEvent;
 

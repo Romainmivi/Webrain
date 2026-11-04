@@ -32,7 +32,6 @@ public class EquipementService {
         return equipementRepository.findAll();
     }
 
-
     public Optional<Equipement> getEquipement(Integer id) {
         return equipementRepository.findWithStationById(id);
     }

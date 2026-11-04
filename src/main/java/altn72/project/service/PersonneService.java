@@ -50,10 +50,9 @@ public class PersonneService {
         });
     }
 
-
     @Transactional
-    public Responsable ajouterResponsable(String login, String s, String prenom, String nom) {
-        String motDePasseHash = passwordEncoder.encode(s);
+    public Responsable ajouterResponsable(String login, String motDePasse, String prenom, String nom) {
+        String motDePasseHash = passwordEncoder.encode(motDePasse);
         Responsable responsable = new Responsable(login, motDePasseHash, prenom, nom);
         return responsableRepository.save(responsable);
     }
@@ -94,6 +93,9 @@ public class PersonneService {
         return true;
     }
 
+    private static final String PREFIXE_BCRYPT_2A = "$2a$";
+    private static final String PREFIXE_BCRYPT_2B = "$2b$";
+
     /**
      * Migre les mots de passe en clair vers BCrypt.
      * Un mot de passe est considéré comme déjà hashé s'il commence par "$2a$" ou "$2b$".
@@ -105,7 +107,7 @@ public class PersonneService {
         int count = 0;
         for (Personne personne : personnes) {
             String motDePasse = personne.getMotDePasse();
-            if (motDePasse != null && !motDePasse.startsWith("$2a$") && !motDePasse.startsWith("$2b$")) {
+            if (motDePasse != null && !motDePasse.startsWith(PREFIXE_BCRYPT_2A) && !motDePasse.startsWith(PREFIXE_BCRYPT_2B)) {
                 personne.setMotDePasse(passwordEncoder.encode(motDePasse));
                 personneRepository.save(personne);
                 count++;

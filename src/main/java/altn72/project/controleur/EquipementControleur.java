@@ -1,6 +1,7 @@
 package altn72.project.controleur;
 
 import altn72.project.exception.RessourceIntrouvableException;
+import altn72.project.modele.Station;
 import altn72.project.modele.equipements.Equipement;
 import altn72.project.modele.equipements.TypeEquipement;
 import altn72.project.service.EquipementService;
@@ -76,7 +77,7 @@ public class EquipementControleur {
             @PathVariable Integer id,
             @ModelAttribute EquipementUpdateRequest request
     ) {
-        var station = stationService.getStation(request.idStation())
+        Station station = stationService.getStation(request.idStation())
                 .orElseThrow(() -> new RessourceIntrouvableException("Station", request.idStation()));
         equipementService.modifierEquipement(id, request.description(), station, request.etat())
                 .orElseThrow(() -> new RessourceIntrouvableException("Équipement", id));

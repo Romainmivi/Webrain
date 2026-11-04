@@ -25,7 +25,7 @@ public abstract class Personne {
     private String login;
 
     @Column(name = "mot_de_passe", nullable = false, columnDefinition = "mediumtext")
-    private String motDePasse;//à chiffrer, revoir son implémentation
+    private String motDePasse;
 
     @Column(name = "prenom", nullable = false, length = 100)
     private String prenom;

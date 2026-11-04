@@ -33,7 +33,7 @@ public class Equipement {
     private String description;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, name = "type_equipement" , length = 40)
+    @Column(nullable = false, name = "type_equipement", length = 40)
     private TypeEquipement typeEquipement;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -43,7 +43,6 @@ public class Equipement {
     @Enumerated(EnumType.STRING)
     @Column(name = "etat", nullable = false, length = 20)
     private Etat etat;
-
 
     protected Equipement(String description, TypeEquipement typeEquipement, Station station, Etat etat) {
         this.description = description;
@@ -60,7 +59,7 @@ public class Equipement {
         return id;
     }
 
-    public enum Etat{
+    public enum Etat {
         ETEINT, EN_MARCHE, HS
     }
 
@@ -80,11 +79,11 @@ public class Equipement {
         this.etat = enFonctionnement;
     }
 
-    public String getDescription(){
+    public String getDescription() {
         return description;
     }
 
-    public void setDescription(String description){
+    public void setDescription(String description) {
         this.description = description;
     }
 

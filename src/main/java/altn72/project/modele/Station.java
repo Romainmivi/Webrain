@@ -33,7 +33,7 @@ public class Station {
     private String ville;
 
     @OneToMany(mappedBy = "station")
-    private final List<Equipement> Equipements = new ArrayList<>();
+    private final List<Equipement> equipements = new ArrayList<>();
 
     protected Station() {
     }
@@ -54,24 +54,36 @@ public class Station {
         this.longitude = longitude;
     }
 
-    public void ajouterEquipement(Equipement e) {
-        Equipements.add(e);
-        e.setStation(this);
+    public void ajouterEquipement(Equipement equipement) {
+        equipements.add(equipement);
+        equipement.setStation(this);
     }
 
     public long nbEquipementsHorsService() {
-        return Equipements.stream()
-                .filter(e -> e.getEtat() == Equipement.Etat.HS)
+        return equipements.stream()
+                .filter(equipement -> equipement.getEtat() == Equipement.Etat.HS)
                 .count();
     }
 
-    // getters / setters
-    public int getId() { return id; }
-    public String getNom() { return nom; }
-    public double getLatitude() { return latitude; }
-    public double getLongitude() { return longitude; }
-    public List<Equipement> getEquipements() { return Equipements; }
+    public int getId() {
+        return id;
+    }
 
+    public String getNom() {
+        return nom;
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public List<Equipement> getEquipements() {
+        return equipements;
+    }
 
     public String getAdresse() {
         return adresse;
@@ -81,7 +93,7 @@ public class Station {
         this.adresse = adresse;
     }
 
-    public void setNom(String nom){
+    public void setNom(String nom) {
         this.nom = nom;
     }
 
@@ -93,14 +105,10 @@ public class Station {
         this.ville = ville;
     }
 
-    public void addEquipements(List<Equipement> equipements){
-        equipements.forEach(equipement -> {
+    public void addEquipements(List<Equipement> equipementsListe) {
+        equipementsListe.forEach(equipement -> {
             equipement.setStation(this);
-            Equipements.add(equipement);
+            this.equipements.add(equipement);
         });
-    }
-
-    public void removeEquipementById(int id){
-        //TODO
     }
 }

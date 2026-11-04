@@ -6,7 +6,13 @@ import altn72.project.modele.personnes.Responsable;
 import altn72.project.service.PersonneService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 
 import java.util.List;
 
@@ -20,7 +26,7 @@ public class PersonneControleur {
     }
 
     @GetMapping("/getAgents")
-    public String getAgents(Model model){    // Avec Thymeleaf
+    public String getAgents(Model model) {
         List<Agent> liste = personneService.getAgents();
         model.addAttribute("agents", liste);
         return "agent/listeAgents";
@@ -69,9 +75,8 @@ public class PersonneControleur {
     public record AgentRequest(String login, String motDePasse, String prenom, String nom) {
     }
 
-
     @GetMapping("/getResponsables")
-    public String getResponsables(Model model){    // Avec Thymeleaf
+    public String getResponsables(Model model) {
         List<Responsable> liste = personneService.getResponsables();
         model.addAttribute("responsables", liste);
         return "responsable/listeResponsables";
@@ -83,7 +88,6 @@ public class PersonneControleur {
         return "responsable/nouveauResponsable";
     }
 
-    // A revoir
     @PostMapping("/addResponsable")
     public String ajouterResponsable(@ModelAttribute ResponsableRequest request) {
         Responsable responsable = personneService.ajouterResponsable(

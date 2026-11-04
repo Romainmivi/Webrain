@@ -1,5 +1,6 @@
 package altn72.project.controleur;
 
+import altn72.project.exception.RequeteInvalideException;
 import altn72.project.exception.RessourceIntrouvableException;
 import altn72.project.modele.Station;
 import altn72.project.modele.equipements.Equipement;
@@ -48,8 +49,18 @@ public class EquipementControleur {
 
     @PostMapping("/addEquipement")
     public String ajouterEquipement(@ModelAttribute EquipementRequest request) {
+        if (request.description() == null || request.description().trim().isEmpty()) {
+            throw new RequeteInvalideException("La description de l'équipement est obligatoire");
+        }
+        if (request.typeEquipement() == null) {
+            throw new RequeteInvalideException("Le type d'équipement est obligatoire");
+        }
+        if (request.idStation() == null) {
+            throw new RequeteInvalideException("La station est obligatoire");
+        }
+
         Equipement equipement = equipementService.ajouterEquipement(
-                request.description(),
+                request.description().trim(),
                 request.typeEquipement(),
                 request.idStation(),
                 request.etat()
@@ -77,9 +88,16 @@ public class EquipementControleur {
             @PathVariable Integer id,
             @ModelAttribute EquipementUpdateRequest request
     ) {
+        if (request.description() == null || request.description().trim().isEmpty()) {
+            throw new RequeteInvalideException("La description de l'équipement est obligatoire");
+        }
+        if (request.idStation() == null) {
+            throw new RequeteInvalideException("La station est obligatoire");
+        }
+
         Station station = stationService.getStation(request.idStation())
                 .orElseThrow(() -> new RessourceIntrouvableException("Station", request.idStation()));
-        equipementService.modifierEquipement(id, request.description(), station, request.etat())
+        equipementService.modifierEquipement(id, request.description().trim(), station, request.etat())
                 .orElseThrow(() -> new RessourceIntrouvableException("Équipement", id));
         return "redirect:/api/equipements/getEquipement/" + id;
     }

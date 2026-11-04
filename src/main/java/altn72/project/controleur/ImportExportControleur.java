@@ -1,5 +1,6 @@
 package altn72.project.controleur;
 
+import altn72.project.exception.RequeteInvalideException;
 import altn72.project.service.ImportExportService;
 import altn72.project.service.ImportExportService.ImportResult;
 import org.springframework.http.HttpHeaders;
@@ -33,14 +34,36 @@ public class ImportExportControleur {
 
     @PostMapping("/import-stations")
     public String importerStations(@RequestParam("file") MultipartFile file, Model model) {
-        if (file.isEmpty()) {
+        if (file == null || file.isEmpty()) {
             model.addAttribute("erreur", "Veuillez sélectionner un fichier CSV.");
+            return "import/importStations";
+        }
+
+        // Vérifier le type de fichier
+        String filename = file.getOriginalFilename();
+        if (filename == null || !filename.toLowerCase().endsWith(".csv")) {
+            model.addAttribute("erreur", "Seuls les fichiers CSV sont acceptés.");
+            return "import/importStations";
+        }
+
+        // Vérifier le type MIME
+        String contentType = file.getContentType();
+        if (contentType != null && !contentType.contains("csv") && !contentType.contains("text")) {
+            model.addAttribute("erreur", "Le fichier sélectionné ne semble pas être un fichier CSV.");
+            return "import/importStations";
+        }
+
+        // Vérifier la taille du fichier (max 5 Mo)
+        if (file.getSize() > 5 * 1024 * 1024) {
+            model.addAttribute("erreur", "Le fichier est trop volumineux (maximum 5 Mo).");
             return "import/importStations";
         }
 
         try {
             ImportResult result = importExportService.importerStationsCsv(file.getInputStream());
             model.addAttribute("result", result);
+        } catch (RequeteInvalideException e) {
+            model.addAttribute("erreur", e.getMessage());
         } catch (IOException e) {
             model.addAttribute("erreur", "Erreur lors de la lecture du fichier : " + e.getMessage());
         }

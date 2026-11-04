@@ -1,6 +1,7 @@
 package altn72.project.controleur;
 
 import altn72.project.exception.RegleMetierException;
+import altn72.project.exception.RequeteInvalideException;
 import altn72.project.exception.RessourceIntrouvableException;
 import altn72.project.modele.Station;
 import altn72.project.service.StationService;
@@ -42,10 +43,20 @@ public class StationControleur {
 
     @PostMapping("/addStation")
     public String ajouterStation(@ModelAttribute StationRequest request) {
+        if (request.nom() == null || request.nom().trim().isEmpty()) {
+            throw new RequeteInvalideException("Le nom de la station est obligatoire");
+        }
+        if (request.adresse() == null || request.adresse().trim().isEmpty()) {
+            throw new RequeteInvalideException("L'adresse de la station est obligatoire");
+        }
+        if (request.ville() == null || request.ville().trim().isEmpty()) {
+            throw new RequeteInvalideException("La ville de la station est obligatoire");
+        }
+
         Station station = stationService.ajouterStation(
-                request.nom(),
-                request.adresse(),
-                request.ville()
+                request.nom().trim(),
+                request.adresse().trim(),
+                request.ville().trim()
         );
         return "redirect:/api/stations/getStation/" + station.getId();
     }
@@ -60,7 +71,17 @@ public class StationControleur {
 
     @PutMapping("/getStation/{id}")
     public String modifierStation(@PathVariable Integer id, @ModelAttribute StationRequest request) {
-        stationService.modifierStation(id, request.nom(), request.adresse(), request.ville())
+        if (request.nom() == null || request.nom().trim().isEmpty()) {
+            throw new RequeteInvalideException("Le nom de la station est obligatoire");
+        }
+        if (request.adresse() == null || request.adresse().trim().isEmpty()) {
+            throw new RequeteInvalideException("L'adresse de la station est obligatoire");
+        }
+        if (request.ville() == null || request.ville().trim().isEmpty()) {
+            throw new RequeteInvalideException("La ville de la station est obligatoire");
+        }
+
+        stationService.modifierStation(id, request.nom().trim(), request.adresse().trim(), request.ville().trim())
                 .orElseThrow(() -> new RessourceIntrouvableException("Station", id));
         return "redirect:/api/stations/getStation/" + id;
     }

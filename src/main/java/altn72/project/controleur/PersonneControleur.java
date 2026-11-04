@@ -1,5 +1,6 @@
 package altn72.project.controleur;
 
+import altn72.project.exception.RequeteInvalideException;
 import altn72.project.exception.RessourceIntrouvableException;
 import altn72.project.modele.personnes.Agent;
 import altn72.project.modele.personnes.Responsable;
@@ -40,11 +41,27 @@ public class PersonneControleur {
 
     @PostMapping("/addAgent")
     public String ajouterAgent(@ModelAttribute AgentRequest request) {
+        if (request.login() == null || request.login().trim().isEmpty()) {
+            throw new RequeteInvalideException("Le login est obligatoire");
+        }
+        if (request.motDePasse() == null || request.motDePasse().trim().isEmpty()) {
+            throw new RequeteInvalideException("Le mot de passe est obligatoire");
+        }
+        if (request.motDePasse().length() < 4) {
+            throw new RequeteInvalideException("Le mot de passe doit contenir au moins 4 caractères");
+        }
+        if (request.prenom() == null || request.prenom().trim().isEmpty()) {
+            throw new RequeteInvalideException("Le prénom est obligatoire");
+        }
+        if (request.nom() == null || request.nom().trim().isEmpty()) {
+            throw new RequeteInvalideException("Le nom est obligatoire");
+        }
+
         Agent agent = personneService.ajouterAgent(
-                request.login(),
+                request.login().trim(),
                 request.motDePasse(),
-                request.prenom(),
-                request.nom()
+                request.prenom().trim(),
+                request.nom().trim()
         );
         return "redirect:/api/personnes/getAgent/" + agent.getId();
     }
@@ -59,7 +76,17 @@ public class PersonneControleur {
 
     @PutMapping("/getAgent/{id}")
     public String modifierAgent(@PathVariable Integer id, @ModelAttribute PersonneRequest request) {
-        personneService.modifierAgent(id, request.login(), request.prenom(), request.nom())
+        if (request.login() == null || request.login().trim().isEmpty()) {
+            throw new RequeteInvalideException("Le login est obligatoire");
+        }
+        if (request.prenom() == null || request.prenom().trim().isEmpty()) {
+            throw new RequeteInvalideException("Le prénom est obligatoire");
+        }
+        if (request.nom() == null || request.nom().trim().isEmpty()) {
+            throw new RequeteInvalideException("Le nom est obligatoire");
+        }
+
+        personneService.modifierAgent(id, request.login().trim(), request.prenom().trim(), request.nom().trim())
                 .orElseThrow(() -> new RessourceIntrouvableException("Agent", id));
         return "redirect:/api/personnes/getAgent/" + id;
     }
@@ -90,11 +117,27 @@ public class PersonneControleur {
 
     @PostMapping("/addResponsable")
     public String ajouterResponsable(@ModelAttribute ResponsableRequest request) {
+        if (request.login() == null || request.login().trim().isEmpty()) {
+            throw new RequeteInvalideException("Le login est obligatoire");
+        }
+        if (request.motDePasse() == null || request.motDePasse().trim().isEmpty()) {
+            throw new RequeteInvalideException("Le mot de passe est obligatoire");
+        }
+        if (request.motDePasse().length() < 4) {
+            throw new RequeteInvalideException("Le mot de passe doit contenir au moins 4 caractères");
+        }
+        if (request.prenom() == null || request.prenom().trim().isEmpty()) {
+            throw new RequeteInvalideException("Le prénom est obligatoire");
+        }
+        if (request.nom() == null || request.nom().trim().isEmpty()) {
+            throw new RequeteInvalideException("Le nom est obligatoire");
+        }
+
         Responsable responsable = personneService.ajouterResponsable(
-                request.login(),
+                request.login().trim(),
                 request.motDePasse(),
-                request.prenom(),
-                request.nom()
+                request.prenom().trim(),
+                request.nom().trim()
         );
         return "redirect:/api/personnes/getResponsable/" + responsable.getId();
     }
@@ -109,7 +152,17 @@ public class PersonneControleur {
 
     @PutMapping("/getResponsable/{id}")
     public String modifierResponsable(@PathVariable Integer id, @ModelAttribute PersonneRequest request) {
-        personneService.modifierResponsable(id, request.login(), request.prenom(), request.nom())
+        if (request.login() == null || request.login().trim().isEmpty()) {
+            throw new RequeteInvalideException("Le login est obligatoire");
+        }
+        if (request.prenom() == null || request.prenom().trim().isEmpty()) {
+            throw new RequeteInvalideException("Le prénom est obligatoire");
+        }
+        if (request.nom() == null || request.nom().trim().isEmpty()) {
+            throw new RequeteInvalideException("Le nom est obligatoire");
+        }
+
+        personneService.modifierResponsable(id, request.login().trim(), request.prenom().trim(), request.nom().trim())
                 .orElseThrow(() -> new RessourceIntrouvableException("Responsable", id));
         return "redirect:/api/personnes/getResponsable/" + id;
     }

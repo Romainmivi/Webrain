@@ -1,5 +1,6 @@
 package altn72.project.controleur;
 
+import altn72.project.exception.RequeteInvalideException;
 import altn72.project.exception.RessourceIntrouvableException;
 import altn72.project.modele.Incident;
 import altn72.project.modele.IncidentEvent;
@@ -59,11 +60,24 @@ public class IncidentControleur {
 
     @PostMapping("/addIncident")
     public String ajouterIncident(@ModelAttribute IncidentRequest request) {
+        if (request.equipementId() == null) {
+            throw new RequeteInvalideException("L'équipement est obligatoire");
+        }
+        if (request.agentId() == null) {
+            throw new RequeteInvalideException("L'agent est obligatoire");
+        }
+        if (request.description() == null || request.description().trim().isEmpty()) {
+            throw new RequeteInvalideException("La description de l'incident est obligatoire");
+        }
+        if (request.description().length() > 2000) {
+            throw new RequeteInvalideException("La description ne peut pas dépasser 2000 caractères");
+        }
+
         Incident incident = incidentService.ajouterIncident(
                 request.equipementId(),
                 request.agentId(),
                 request.prestataireId(),
-                request.description()
+                request.description().trim()
         );
         return "redirect:/api/incidents/getIncident/" + incident.getId();
     }
@@ -93,6 +107,16 @@ public class IncidentControleur {
             @PathVariable Integer id,
             @ModelAttribute IncidentUpdateRequest request
     ) {
+        if (request.description() == null || request.description().trim().isEmpty()) {
+            throw new RequeteInvalideException("La description de l'incident est obligatoire");
+        }
+        if (request.description().length() > 2000) {
+            throw new RequeteInvalideException("La description ne peut pas dépasser 2000 caractères");
+        }
+        if (request.status() == null) {
+            throw new RequeteInvalideException("Le statut est obligatoire");
+        }
+
         Prestataire prestataire = request.prestataireId() == null
                 ? null
                 : prestataireService.getPrestataire(request.prestataireId())
@@ -100,7 +124,7 @@ public class IncidentControleur {
                                 "Prestataire", request.prestataireId()));
         incidentService.modifierIncident(
                         id,
-                        request.description(),
+                        request.description().trim(),
                         request.status(),
                         prestataire
                 )

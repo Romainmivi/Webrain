@@ -23,7 +23,12 @@
             <dd class="col-sm-9"
                 th:text="${incident.prestataire != null ? incident.prestataire.nom : 'Aucun'}"></dd>
             <dt class="col-sm-3">Date d'ouverture</dt>
-            <dd class="col-sm-9" th:text="${incident.dateOuverture}"></dd>
+            <dd class="col-sm-9">
+                <span th:text="${#temporals.format(incident.dateOuverture, 'dd/MM/yyyy HH:mm')}"></span>
+                <span class="badge ms-2" th:classappend="'bg-' + ${incident.indicateurCouleur}">
+                    <span th:text="${incident.dureeHeures} + 'h'"></span>
+                </span>
+            </dd>
             <dt class="col-sm-3">Statut</dt>
             <dd class="col-sm-9" th:text="${incident.status}"></dd>
             <dt class="col-sm-3">Date de clôture</dt>
@@ -50,7 +55,11 @@
         <p><strong>Agent déclarant :</strong>
             <span th:text="${incident.agent.prenom + ' ' + incident.agent.nom}"></span>
         </p>
-        <p><strong>Date d'ouverture :</strong> <span th:text="${incident.dateOuverture}"></span></p>
+        <p><strong>Date d'ouverture :</strong> <span th:text="${#temporals.format(incident.dateOuverture, 'dd/MM/yyyy HH:mm')}"></span>
+            <span class="badge ms-2" th:classappend="'bg-' + ${incident.indicateurCouleur}">
+                <span th:text="${incident.dureeHeures} + 'h'"></span>
+            </span>
+        </p>
 
         <label class="form-label" for="status">Statut</label>
         <select th:field="*{status}" class="form-select mb-3 w-50" required>

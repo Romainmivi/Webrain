@@ -18,6 +18,7 @@
             <th>Agent</th>
             <th>Prestataire</th>
             <th>Date d'ouverture</th>
+            <th>Durée</th>
             <th>Statut</th>
             <th>Description</th>
             <th>Actions</th>
@@ -29,7 +30,12 @@
             <td th:text="${incident.equipement.id + ' - ' + incident.equipement.description}"></td>
             <td th:text="${incident.agent.prenom + ' ' + incident.agent.nom}"></td>
             <td th:text="${incident.prestataire != null ? incident.prestataire.nom : '-'}"></td>
-            <td th:text="${incident.dateOuverture}"></td>
+            <td th:text="${#temporals.format(incident.dateOuverture, 'dd/MM/yyyy HH:mm')}"></td>
+            <td>
+                <span class="badge" th:classappend="'bg-' + ${incident.indicateurCouleur}">
+                    <span th:text="${incident.dureeHeures} + 'h'"></span>
+                </span>
+            </td>
             <td th:text="${incident.status}"></td>
             <td th:text="${incident.description}"></td>
             <td>
@@ -42,7 +48,7 @@
             </td>
         </tr>
         <tr th:if="${#lists.isEmpty(incidents)}">
-            <td colspan="8" class="text-center text-muted">Aucun incident.</td>
+            <td colspan="9" class="text-center text-muted">Aucun incident.</td>
         </tr>
         </tbody>
     </table>

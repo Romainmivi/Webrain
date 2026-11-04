@@ -14,11 +14,16 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "incident")
 public class Incident {
+
+    // Seuils en heures pour l'indicateur de couleur
+    public static final long SEUIL_VERT_HEURES    = 48;  // moins de 48h = vert
+    public static final long SEUIL_ORANGE_HEURES  = 72;  // 48h à moins de 72h = orange, 72h+ = rouge
 
     public Integer getId() {
         return id;
@@ -128,6 +133,17 @@ public class Incident {
 
     public void setDateCloture(LocalDateTime dateCloture) {
         this.dateCloture = dateCloture;
+    }
+
+    public long getDureeHeures() {
+        return Duration.between(dateOuverture, LocalDateTime.now()).toHours();
+    }
+
+    public String getIndicateurCouleur() {
+        long heures = getDureeHeures();
+        if (heures < SEUIL_VERT_HEURES) return "success";    // vert
+        if (heures < SEUIL_ORANGE_HEURES) return "warning";  // orange
+        return "danger";                                     // rouge
     }
 
 }

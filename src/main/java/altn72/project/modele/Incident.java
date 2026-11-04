@@ -14,6 +14,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+import java.time.Clock;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
@@ -24,6 +25,16 @@ public class Incident {
     // Seuils en heures pour l'indicateur de couleur
     public static final long SEUIL_VERT_HEURES    = 48;  // moins de 48h = vert
     public static final long SEUIL_ORANGE_HEURES  = 72;  // 48h à moins de 72h = orange, 72h+ = rouge
+
+    private static Clock clock = Clock.systemDefaultZone();
+
+    static void setClock(Clock clock) {
+        Incident.clock = clock;
+    }
+
+    static void resetClock() {
+        Incident.clock = Clock.systemDefaultZone();
+    }
 
     public Integer getId() {
         return id;
@@ -136,7 +147,7 @@ public class Incident {
     }
 
     public long getDureeHeures() {
-        return Duration.between(dateOuverture, LocalDateTime.now()).toHours();
+        return Duration.between(dateOuverture, LocalDateTime.now(clock)).toHours();
     }
 
     public String getIndicateurCouleur() {

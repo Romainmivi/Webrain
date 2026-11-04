@@ -3,6 +3,7 @@ package altn72.project.service;
 import altn72.project.exception.RessourceDejaExistanteException;
 import altn72.project.modele.Station;
 import altn72.project.modele.StationRepository;
+import altn72.project.modele.equipements.EquipementRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -19,12 +20,14 @@ import static org.mockito.Mockito.when;
 class StationServiceTest {
 
     private StationRepository stationRepository;
+    private EquipementRepository equipementRepository;
     private StationService stationService;
 
     @BeforeEach
     void setUp() {
         stationRepository = mock(StationRepository.class);
-        stationService = new StationService(stationRepository);
+        equipementRepository = mock(EquipementRepository.class);
+        stationService = new StationService(stationRepository, equipementRepository);
     }
 
     @Test

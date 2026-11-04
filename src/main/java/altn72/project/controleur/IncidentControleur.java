@@ -1,12 +1,12 @@
 package altn72.project.controleur;
 
+import altn72.project.exception.RessourceIntrouvableException;
 import altn72.project.modele.Incident;
 import altn72.project.modele.Prestataire;
 import altn72.project.service.IncidentService;
 import altn72.project.service.EquipementService;
 import altn72.project.service.PersonneService;
 import altn72.project.service.PrestataireService;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -71,8 +70,7 @@ public class IncidentControleur {
     @GetMapping("/getIncident/{id}")
     public String getIncident(@PathVariable Integer id, Model model) {
         Incident incident = incidentService.getIncident(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Incident introuvable"));
+                .orElseThrow(() -> new RessourceIntrouvableException("Incident", id));
         model.addAttribute("incident", incident);
         model.addAttribute("incidentUpdate", new IncidentUpdateRequest(
                 incident.getDescription(),
@@ -93,25 +91,22 @@ public class IncidentControleur {
         Prestataire prestataire = request.prestataireId() == null
                 ? null
                 : prestataireService.getPrestataire(request.prestataireId())
-                        .orElseThrow(() -> new ResponseStatusException(
-                                HttpStatus.NOT_FOUND, "Prestataire introuvable"));
+                        .orElseThrow(() -> new RessourceIntrouvableException(
+                                "Prestataire", request.prestataireId()));
         incidentService.modifierIncident(
                         id,
                         request.description(),
                         request.status(),
                         prestataire
                 )
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Incident introuvable"));
+                .orElseThrow(() -> new RessourceIntrouvableException("Incident", id));
         return "redirect:/api/incidents/getIncident/" + id;
     }
 
     @DeleteMapping("/incident/{idIncident}")
     public String deleteIncident(@PathVariable Integer idIncident) {
         if (!incidentService.supprimerIncident(idIncident)) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
-                    "L'incident dont l'id est " + idIncident + " n'existe pas");
+            throw new RessourceIntrouvableException("Incident", idIncident);
         }
         return "redirect:/api/incidents/getIncidents";
     }

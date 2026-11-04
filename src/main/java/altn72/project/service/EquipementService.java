@@ -1,5 +1,6 @@
 package altn72.project.service;
 
+import altn72.project.exception.RessourceIntrouvableException;
 import altn72.project.modele.Station;
 import altn72.project.modele.StationRepository;
 import altn72.project.modele.equipements.Ascenseur;
@@ -38,7 +39,7 @@ public class EquipementService {
 
     public Equipement ajouterEquipement(String description, TypeEquipement typeEquipement, Integer idStation, Equipement.Etat etat) {
         Station station = stationRepository.findById(idStation)
-                .orElseThrow(() -> new IllegalArgumentException("Station introuvable"));
+                .orElseThrow(() -> new RessourceIntrouvableException("Station", idStation));
 
         Equipement equipement = switch (typeEquipement) {
             case ASCENSEUR -> new Ascenseur(description, typeEquipement, station, etat);

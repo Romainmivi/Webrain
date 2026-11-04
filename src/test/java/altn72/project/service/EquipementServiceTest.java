@@ -1,5 +1,6 @@
 package altn72.project.service;
 
+import altn72.project.exception.RessourceIntrouvableException;
 import altn72.project.modele.Station;
 import altn72.project.modele.StationRepository;
 import altn72.project.modele.equipements.Ascenseur;
@@ -58,7 +59,7 @@ class EquipementServiceTest {
         when(stationRepository.findById(9)).thenReturn(Optional.empty());
 
         org.junit.jupiter.api.Assertions.assertThrows(
-                IllegalArgumentException.class,
+                RessourceIntrouvableException.class,
                 () -> equipementService.ajouterEquipement(
                         "Description", TypeEquipement.ASCENSEUR, 9, Equipement.Etat.HS)
         );

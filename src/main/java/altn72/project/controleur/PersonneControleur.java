@@ -1,17 +1,14 @@
 package altn72.project.controleur;
 
+import altn72.project.exception.RessourceIntrouvableException;
 import altn72.project.modele.personnes.Agent;
 import altn72.project.modele.personnes.Responsable;
 import altn72.project.service.PersonneService;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-
-import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Controller
 @RequestMapping("/api/personnes")
@@ -49,7 +46,7 @@ public class PersonneControleur {
     @GetMapping("/getAgent/{id}")
     public String getAgent(@PathVariable Integer id, Model model) {
         Agent agent = personneService.getAgent(id)
-                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Agent introuvable"));
+                .orElseThrow(() -> new RessourceIntrouvableException("Agent", id));
         model.addAttribute("agent", agent);
         return "agent/detailsAgent";
     }
@@ -57,15 +54,14 @@ public class PersonneControleur {
     @PutMapping("/getAgent/{id}")
     public String modifierAgent(@PathVariable Integer id, @ModelAttribute PersonneRequest request) {
         personneService.modifierAgent(id, request.login(), request.prenom(), request.nom())
-                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Agent introuvable"));
+                .orElseThrow(() -> new RessourceIntrouvableException("Agent", id));
         return "redirect:/api/personnes/getAgent/" + id;
     }
 
     @DeleteMapping("/agent/{idAgent}")
     public String deleteAgent(@PathVariable("idAgent") Integer idAgent) {
         if (!personneService.supprimerAgent(idAgent)) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "L'agent dont l'id est " + idAgent + " n'existe pas");
+            throw new RessourceIntrouvableException("Agent", idAgent);
         }
         return "redirect:/api/personnes/getAgents";
     }
@@ -102,7 +98,7 @@ public class PersonneControleur {
     @GetMapping("/getResponsable/{id}")
     public String getResponsable(@PathVariable Integer id, Model model) {
         Responsable responsable = personneService.getResponsable(id)
-                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Responsable introuvable"));
+                .orElseThrow(() -> new RessourceIntrouvableException("Responsable", id));
         model.addAttribute("responsable", responsable);
         return "responsable/detailsResponsable";
     }
@@ -110,15 +106,14 @@ public class PersonneControleur {
     @PutMapping("/getResponsable/{id}")
     public String modifierResponsable(@PathVariable Integer id, @ModelAttribute PersonneRequest request) {
         personneService.modifierResponsable(id, request.login(), request.prenom(), request.nom())
-                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Responsable introuvable"));
+                .orElseThrow(() -> new RessourceIntrouvableException("Responsable", id));
         return "redirect:/api/personnes/getResponsable/" + id;
     }
 
     @DeleteMapping("/responsable/{idResponsable}")
     public String deleteResponsable(@PathVariable("idResponsable") Integer idResponsable) {
         if (!personneService.supprimerResponsable(idResponsable)) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "L'agent dont l'id est " + idResponsable + " n'existe pas");
+            throw new RessourceIntrouvableException("Responsable", idResponsable);
         }
         return "redirect:/api/personnes/getResponsables";
     }

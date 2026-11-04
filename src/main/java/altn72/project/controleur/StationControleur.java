@@ -1,12 +1,11 @@
 package altn72.project.controleur;
 
+import altn72.project.exception.RessourceIntrouvableException;
 import altn72.project.modele.Station;
 import altn72.project.service.StationService;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -37,7 +36,7 @@ public class StationControleur {
     }
 
     @PostMapping("/addStation")
-    public String ajouterStation(@ModelAttribute StationRequest request) throws Exception {
+    public String ajouterStation(@ModelAttribute StationRequest request) {
         Station station = stationService.ajouterStation(
                 request.nom(),
                 request.adresse(),
@@ -49,8 +48,7 @@ public class StationControleur {
     @GetMapping("/getStation/{id}")
     public String getStation(@PathVariable Integer id, Model model) {
         Station station = stationService.getStation(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Station introuvable"));
+                .orElseThrow(() -> new RessourceIntrouvableException("Station", id));
         model.addAttribute("station", station);
         return "station/detailsStation";
     }
@@ -58,17 +56,14 @@ public class StationControleur {
     @PutMapping("/getStation/{id}")
     public String modifierStation(@PathVariable Integer id, @ModelAttribute StationRequest request) {
         stationService.modifierStation(id, request.nom(), request.adresse(), request.ville())
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Station introuvable"));
+                .orElseThrow(() -> new RessourceIntrouvableException("Station", id));
         return "redirect:/api/stations/getStation/" + id;
     }
 
     @DeleteMapping("/station/{idStation}")
     public String deleteStation(@PathVariable Integer idStation) {
         if (!stationService.supprimerStation(idStation)) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
-                    "La station dont l'id est " + idStation + " n'existe pas");
+            throw new RessourceIntrouvableException("Station", idStation);
         }
         return "redirect:/api/stations/getStations";
     }

@@ -1,10 +1,10 @@
 package altn72.project.controleur;
 
+import altn72.project.exception.RessourceIntrouvableException;
 import altn72.project.modele.equipements.Equipement;
 import altn72.project.modele.equipements.TypeEquipement;
 import altn72.project.service.EquipementService;
 import altn72.project.service.StationService;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -60,8 +59,7 @@ public class EquipementControleur {
     @GetMapping("/getEquipement/{id}")
     public String getEquipement(@PathVariable Integer id, Model model) {
         Equipement equipement = equipementService.getEquipement(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Équipement introuvable"));
+                .orElseThrow(() -> new RessourceIntrouvableException("Équipement", id));
         model.addAttribute("equipement", equipement);
         model.addAttribute("equipementUpdate", new EquipementUpdateRequest(
                 equipement.getDescription(),
@@ -79,20 +77,16 @@ public class EquipementControleur {
             @ModelAttribute EquipementUpdateRequest request
     ) {
         var station = stationService.getStation(request.idStation())
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Station introuvable"));
+                .orElseThrow(() -> new RessourceIntrouvableException("Station", request.idStation()));
         equipementService.modifierEquipement(id, request.description(), station, request.etat())
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Équipement introuvable"));
+                .orElseThrow(() -> new RessourceIntrouvableException("Équipement", id));
         return "redirect:/api/equipements/getEquipement/" + id;
     }
 
     @DeleteMapping("/equipement/{idEquipement}")
     public String deleteEquipement(@PathVariable Integer idEquipement) {
         if (!equipementService.supprimerEquipement(idEquipement)) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
-                    "L'équipement dont l'id est " + idEquipement + " n'existe pas");
+            throw new RessourceIntrouvableException("Équipement", idEquipement);
         }
         return "redirect:/api/equipements/getEquipements";
     }

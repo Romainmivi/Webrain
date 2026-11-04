@@ -1,5 +1,6 @@
 package altn72.project.service;
 
+import altn72.project.exception.RessourceDejaExistanteException;
 import altn72.project.modele.Station;
 import altn72.project.modele.StationRepository;
 import org.springframework.stereotype.Service;
@@ -21,9 +22,9 @@ public class StationService {
         return stationRepository.findAll();
     }
 
-    public Station ajouterStation(String nom, String adresse, String ville) throws Exception {
-        if(stationRepository.existsByNom(nom)){
-            throw new Exception();
+    public Station ajouterStation(String nom, String adresse, String ville) {
+        if (stationRepository.existsByNom(nom)) {
+            throw new RessourceDejaExistanteException("Station", "nom", nom);
         }
         Station station = new Station(1, nom, adresse, ville);
         return stationRepository.save(station);

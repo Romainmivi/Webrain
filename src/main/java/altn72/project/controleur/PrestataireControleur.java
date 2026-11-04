@@ -1,9 +1,9 @@
 package altn72.project.controleur;
 
+import altn72.project.exception.RessourceIntrouvableException;
 import altn72.project.modele.Prestataire;
 import altn72.project.service.EvaluationService;
 import altn72.project.service.PrestataireService;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -58,8 +57,7 @@ public class PrestataireControleur {
     @GetMapping("/getPrestataire/{id}")
     public String getPrestataire(@PathVariable Integer id, Model model) {
         Prestataire prestataire = prestataireService.getPrestataire(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Prestataire introuvable"));
+                .orElseThrow(() -> new RessourceIntrouvableException("Prestataire", id));
         model.addAttribute("prestataire", prestataire);
         model.addAttribute(
                 "evaluations",
@@ -79,17 +77,14 @@ public class PrestataireControleur {
                         request.numTelephone(),
                         request.email()
                 )
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Prestataire introuvable"));
+                .orElseThrow(() -> new RessourceIntrouvableException("Prestataire", id));
         return "redirect:/api/prestataires/getPrestataire/" + id;
     }
 
     @DeleteMapping("/prestataire/{idPrestataire}")
     public String deletePrestataire(@PathVariable Integer idPrestataire) {
         if (!prestataireService.supprimerPrestataire(idPrestataire)) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
-                    "Le prestataire dont l'id est " + idPrestataire + " n'existe pas");
+            throw new RessourceIntrouvableException("Prestataire", idPrestataire);
         }
         return "redirect:/api/prestataires/getPrestataires";
     }

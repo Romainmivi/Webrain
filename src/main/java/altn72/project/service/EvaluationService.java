@@ -1,5 +1,7 @@
 package altn72.project.service;
 
+import altn72.project.exception.RegleMetierException;
+import altn72.project.exception.RessourceIntrouvableException;
 import altn72.project.modele.Evaluation;
 import altn72.project.modele.EvaluationRepository;
 import altn72.project.modele.Incident;
@@ -46,16 +48,19 @@ public class EvaluationService {
     }
 
     @Transactional
-    public Optional<Evaluation> ajouterEvaluation(Integer incidentId, Integer note, String commentaire) {
-        Optional<Incident> incident = incidentRepository.findWithDetailsById(incidentId)
-                .filter(candidate -> candidate.getStatus() == Incident.Status.CLOTURE)
-                .filter(candidate -> candidate.getPrestataire() != null);
+    public Evaluation ajouterEvaluation(Integer incidentId, Integer note, String commentaire) {
+        Incident incident = incidentRepository.findWithDetailsById(incidentId)
+                .orElseThrow(() -> new RessourceIntrouvableException("Incident", incidentId));
+        if (incident.getStatus() != Incident.Status.CLOTURE || incident.getPrestataire() == null) {
+            throw new RegleMetierException(
+                    "Une évaluation exige un incident clôturé avec un prestataire affecté");
+        }
 
-        return incident.map(candidate -> evaluationRepository.save(Evaluation.creer(
+        return evaluationRepository.save(Evaluation.creer(
                 note,
                 commentaire,
                 LocalDateTime.now(),
-                candidate
-        )));
+                incident
+        ));
     }
 }

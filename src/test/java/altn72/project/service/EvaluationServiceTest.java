@@ -1,5 +1,7 @@
 package altn72.project.service;
 
+import altn72.project.exception.RegleMetierException;
+import altn72.project.exception.RessourceIntrouvableException;
 import altn72.project.modele.Evaluation;
 import altn72.project.modele.EvaluationRepository;
 import altn72.project.modele.Incident;
@@ -14,6 +16,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -44,11 +47,9 @@ class EvaluationServiceTest {
                 .thenAnswer(invocation -> invocation.getArgument(0));
         LocalDateTime avantCreation = LocalDateTime.now();
 
-        Optional<Evaluation> resultat = evaluationService.ajouterEvaluation(12, 4, "Bon travail");
+        Evaluation evaluation = evaluationService.ajouterEvaluation(12, 4, "Bon travail");
 
         LocalDateTime apresCreation = LocalDateTime.now();
-        assertTrue(resultat.isPresent());
-        Evaluation evaluation = resultat.orElseThrow();
         assertEquals(4, evaluation.getNote());
         assertEquals("Bon travail", evaluation.getCommentaire());
         assertSame(incident, evaluation.getIncident());
@@ -63,7 +64,10 @@ class EvaluationServiceTest {
         when(incident.getStatus()).thenReturn(Incident.Status.EN_COURS);
         when(incidentRepository.findWithDetailsById(12)).thenReturn(Optional.of(incident));
 
-        assertTrue(evaluationService.ajouterEvaluation(12, 4, null).isEmpty());
+        assertThrows(
+                RegleMetierException.class,
+                () -> evaluationService.ajouterEvaluation(12, 4, null)
+        );
         verify(evaluationRepository, never()).save(any(Evaluation.class));
     }
 
@@ -74,7 +78,21 @@ class EvaluationServiceTest {
         when(incident.getPrestataire()).thenReturn(null);
         when(incidentRepository.findWithDetailsById(12)).thenReturn(Optional.of(incident));
 
-        assertTrue(evaluationService.ajouterEvaluation(12, 4, null).isEmpty());
+        assertThrows(
+                RegleMetierException.class,
+                () -> evaluationService.ajouterEvaluation(12, 4, null)
+        );
+        verify(evaluationRepository, never()).save(any(Evaluation.class));
+    }
+
+    @Test
+    void signaleUnIncidentIntrouvable() {
+        when(incidentRepository.findWithDetailsById(404)).thenReturn(Optional.empty());
+
+        assertThrows(
+                RessourceIntrouvableException.class,
+                () -> evaluationService.ajouterEvaluation(404, 4, null)
+        );
         verify(evaluationRepository, never()).save(any(Evaluation.class));
     }
 

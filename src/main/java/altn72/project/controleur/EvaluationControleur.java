@@ -1,8 +1,9 @@
 package altn72.project.controleur;
 
+import altn72.project.exception.RequeteInvalideException;
+import altn72.project.exception.RessourceIntrouvableException;
 import altn72.project.modele.Evaluation;
 import altn72.project.service.EvaluationService;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,7 +12,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -45,34 +45,27 @@ public class EvaluationControleur {
     @PostMapping("/addEvaluation")
     public String ajouterEvaluation(@ModelAttribute EvaluationRequest request) {
         if (request.incidentId() == null || request.note() == null) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, "Un incident et une note sont obligatoires");
+            throw new RequeteInvalideException("Un incident et une note sont obligatoires");
         }
         if (request.note() < 0 || request.note() > 5) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, "La note doit être comprise entre 0 et 5");
+            throw new RequeteInvalideException("La note doit être comprise entre 0 et 5");
         }
         if (request.commentaire() != null && request.commentaire().length() > 1000) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, "Le commentaire ne peut pas dépasser 1000 caractères");
+            throw new RequeteInvalideException("Le commentaire ne peut pas dépasser 1000 caractères");
         }
 
         Evaluation evaluation = evaluationService.ajouterEvaluation(
                         request.incidentId(),
                         request.note(),
                         request.commentaire()
-                )
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.BAD_REQUEST,
-                        "L'incident doit être clôturé et avoir un prestataire affecté"));
+                );
         return "redirect:/api/evaluations/getEvaluation/" + evaluation.getId();
     }
 
     @GetMapping("/getEvaluation/{id}")
     public String getEvaluation(@PathVariable Integer id, Model model) {
         Evaluation evaluation = evaluationService.getEvaluation(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Évaluation introuvable"));
+                .orElseThrow(() -> new RessourceIntrouvableException("Évaluation", id));
         model.addAttribute("evaluation", evaluation);
         return "evaluation/detailsEvaluation";
     }

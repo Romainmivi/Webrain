@@ -1,5 +1,6 @@
 package altn72.project.service;
 
+import altn72.project.exception.RessourceIntrouvableException;
 import altn72.project.modele.Incident;
 import altn72.project.modele.IncidentRepository;
 import altn72.project.modele.Prestataire;
@@ -53,13 +54,13 @@ public class IncidentService {
             String description
     ) {
         Equipement equipement = equipementRepository.findById(equipementId)
-                .orElseThrow(() -> new IllegalArgumentException("Équipement introuvable"));
+                .orElseThrow(() -> new RessourceIntrouvableException("Équipement", equipementId));
         Agent agent = agentRepository.findById(agentId)
-                .orElseThrow(() -> new IllegalArgumentException("Agent introuvable"));
+                .orElseThrow(() -> new RessourceIntrouvableException("Agent", agentId));
         Prestataire prestataire = prestataireId == null
                 ? null
                 : prestataireRepository.findById(prestataireId)
-                        .orElseThrow(() -> new IllegalArgumentException("Prestataire introuvable"));
+                        .orElseThrow(() -> new RessourceIntrouvableException("Prestataire", prestataireId));
 
         Incident incident = new Incident(
                 equipement,

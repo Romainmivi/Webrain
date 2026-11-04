@@ -1,5 +1,6 @@
 package altn72.project.service;
 
+import altn72.project.exception.RessourceIntrouvableException;
 import altn72.project.modele.Incident;
 import altn72.project.modele.IncidentRepository;
 import altn72.project.modele.Prestataire;
@@ -78,7 +79,7 @@ class IncidentServiceTest {
         when(equipementRepository.findById(9)).thenReturn(Optional.empty());
 
         org.junit.jupiter.api.Assertions.assertThrows(
-                IllegalArgumentException.class,
+                RessourceIntrouvableException.class,
                 () -> incidentService.ajouterIncident(9, 2, null, "Panne"));
         verify(incidentRepository, never()).save(any(Incident.class));
     }

@@ -1,5 +1,6 @@
 package altn72.project.service;
 
+import altn72.project.exception.RessourceDejaExistanteException;
 import altn72.project.modele.Station;
 import altn72.project.modele.StationRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,7 +28,7 @@ class StationServiceTest {
     }
 
     @Test
-    void ajouteUneStationEtRefuseUnNomDejaUtilise() throws Exception {
+    void ajouteUneStationEtRefuseUnNomDejaUtilise() {
         when(stationRepository.existsByNom("Gare")).thenReturn(false);
         when(stationRepository.save(org.mockito.ArgumentMatchers.any(Station.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
@@ -37,7 +38,10 @@ class StationServiceTest {
         verify(stationRepository).save(station);
 
         when(stationRepository.existsByNom("Gare")).thenReturn(true);
-        assertThrows(Exception.class, () -> stationService.ajouterStation("Gare", "Adresse", "Ville"));
+        assertThrows(
+                RessourceDejaExistanteException.class,
+                () -> stationService.ajouterStation("Gare", "Adresse", "Ville")
+        );
     }
 
     @Test

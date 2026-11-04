@@ -16,4 +16,6 @@ public interface EquipementRepository extends JpaRepository<Equipement, Integer>
     @EntityGraph(attributePaths = "station")
     Optional<Equipement> findWithStationById(Integer id);
 
+    long countByStationId(Integer stationId);
+
 }

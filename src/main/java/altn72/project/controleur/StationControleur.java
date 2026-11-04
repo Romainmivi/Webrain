@@ -1,5 +1,6 @@
 package altn72.project.controleur;
 
+import altn72.project.exception.RegleMetierException;
 import altn72.project.exception.RessourceIntrouvableException;
 import altn72.project.modele.Station;
 import altn72.project.service.StationService;
@@ -61,11 +62,17 @@ public class StationControleur {
     }
 
     @DeleteMapping("/station/{idStation}")
-    public String deleteStation(@PathVariable Integer idStation) {
-        if (!stationService.supprimerStation(idStation)) {
-            throw new RessourceIntrouvableException("Station", idStation);
+    public String deleteStation(@PathVariable Integer idStation, Model model) {
+        try {
+            if (!stationService.supprimerStation(idStation)) {
+                throw new RessourceIntrouvableException("Station", idStation);
+            }
+            return "redirect:/api/stations/getStations";
+        } catch (RegleMetierException e) {
+            model.addAttribute("erreurSuppression", e.getMessage());
+            model.addAttribute("stations", stationService.getStations());
+            return "station/listeStations";
         }
-        return "redirect:/api/stations/getStations";
     }
 
     public record StationRequest(

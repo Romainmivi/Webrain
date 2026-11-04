@@ -1,8 +1,10 @@
 package altn72.project.service;
 
 import altn72.project.exception.RessourceDejaExistanteException;
+import altn72.project.exception.RegleMetierException;
 import altn72.project.modele.Station;
 import altn72.project.modele.StationRepository;
+import altn72.project.modele.equipements.EquipementRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,9 +15,11 @@ import java.util.Optional;
 public class StationService {
 
     private final StationRepository stationRepository;
+    private final EquipementRepository equipementRepository;
 
-    public StationService(StationRepository stationRepository) {
+    public StationService(StationRepository stationRepository, EquipementRepository equipementRepository) {
         this.stationRepository = stationRepository;
+        this.equipementRepository = equipementRepository;
     }
 
     public List<Station> getStations() {
@@ -47,6 +51,12 @@ public class StationService {
 
     public boolean supprimerStation(Integer idStation) {
         if (!stationRepository.existsById(idStation)) return false;
+        long count = equipementRepository.countByStationId(idStation);
+        if (count > 0) {
+            throw new RegleMetierException(
+                "Impossible de supprimer la station : elle possède " + count + " équipement(s) associé(s). Supprimez d'abord les équipements."
+            );
+        }
         stationRepository.deleteById(idStation);
         return true;
     }

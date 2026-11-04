@@ -8,7 +8,13 @@
 <body>
 <th:block th:replace="~{fragment/navbar :: nav}"></th:block>
 <div class="container mt-4">
-    <h1>Import de stations par CSV</h1>
+    <h1>Import / Export de stations par CSV</h1>
+
+    <div class="btn-group mb-3" role="group">
+        <a th:href="@{/api/import-export/export-stations}" class="btn btn-success">
+            <i class="bi bi-download"></i> Exporter les stations
+        </a>
+    </div>
 
     <div class="alert alert-info" role="alert">
         <p class="mb-0"><strong>Format attendu :</strong> id;nom;adresse;ville;latitude;longitude</p>

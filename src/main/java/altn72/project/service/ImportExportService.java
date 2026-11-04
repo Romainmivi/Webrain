@@ -4,11 +4,14 @@ import altn72.project.modele.Station;
 import altn72.project.modele.StationRepository;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -38,12 +41,12 @@ public class ImportExportService {
 
         CSVFormat format = CSVFormat.Builder.create()
                 .setDelimiter(';')
-                .setHeader()
+                .setHeader("id", "nom", "adresse", "ville", "latitude", "longitude")
                 .setSkipHeaderRecord(true)
                 .build();
 
         try (Reader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
-             CSVParser csvParser = CSVFormat.Builder.create().build().parse(reader)) {
+             CSVParser csvParser = format.parse(reader)) {
 
             for (CSVRecord record : csvParser) {
                 try {
@@ -85,5 +88,30 @@ public class ImportExportService {
         }
 
         return new ImportResult(creees, misesAJour, erreursDetails.size(), erreursDetails);
+    }
+
+    public void exporterStationsCsv(OutputStream outputStream) {
+        CSVFormat format = CSVFormat.Builder.create()
+                .setDelimiter(';')
+                .setHeader("id", "nom", "adresse", "ville", "latitude", "longitude")
+                .build();
+
+        try (OutputStreamWriter writer = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8);
+             CSVPrinter csvPrinter = new CSVPrinter(writer, format)) {
+
+            for (Station station : stationRepository.findAll()) {
+                csvPrinter.printRecord(
+                        station.getId(),
+                        station.getNom(),
+                        station.getAdresse(),
+                        station.getVille(),
+                        station.getLatitude(),
+                        station.getLongitude()
+                );
+            }
+            csvPrinter.flush();
+        } catch (Exception e) {
+            throw new RuntimeException("Erreur lors de l'export CSV : " + e.getMessage(), e);
+        }
     }
 }

@@ -11,6 +11,11 @@
 
     <h1>Liste des stations</h1>
 
+    <div th:if="${erreurSuppression}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong>Erreur :</strong> <span th:text="${erreurSuppression}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
     <table class="table table-striped table-hover align-middle">
         <thead>
         <tr>

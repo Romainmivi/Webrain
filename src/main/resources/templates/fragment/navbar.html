@@ -5,6 +5,7 @@
     <div class="container-fluid">
         <a class="navbar-brand" th:href="@{/dashboard}">Webrain</a>
         <div class="navbar-nav ms-auto">
+            <a class="nav-link" th:href="@{/api/import-export/import-stations}">Import CSV</a>
             <span class="nav-item nav-link text-light">
                 <span sec:authentication="name">Utilisateur</span>
                 <span class="badge bg-secondary" sec:authorize="hasRole('AGENT')">Agent</span>

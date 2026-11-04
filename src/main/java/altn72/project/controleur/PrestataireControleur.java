@@ -1,6 +1,7 @@
 package altn72.project.controleur;
 
 import altn72.project.modele.Prestataire;
+import altn72.project.service.EvaluationService;
 import altn72.project.service.PrestataireService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -21,9 +22,14 @@ import java.util.List;
 public class PrestataireControleur {
 
     private final PrestataireService prestataireService;
+    private final EvaluationService evaluationService;
 
-    public PrestataireControleur(PrestataireService prestataireService) {
+    public PrestataireControleur(
+            PrestataireService prestataireService,
+            EvaluationService evaluationService
+    ) {
         this.prestataireService = prestataireService;
+        this.evaluationService = evaluationService;
     }
 
     @GetMapping("/getPrestataires")
@@ -55,6 +61,10 @@ public class PrestataireControleur {
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Prestataire introuvable"));
         model.addAttribute("prestataire", prestataire);
+        model.addAttribute(
+                "evaluations",
+                evaluationService.getEvaluationsByPrestataire(id)
+        );
         return "prestataire/detailsPrestataire";
     }
 

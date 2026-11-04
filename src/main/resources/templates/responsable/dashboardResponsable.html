@@ -12,6 +12,15 @@
     <h1>Tableau de bord — Responsable</h1>
     <p class="lead">Bienvenue ! Vous avez un accès complet à toutes les fonctionnalités.</p>
 
+    <section class="mb-4" aria-labelledby="incidentSummaryTitle">
+        <h2 id="incidentSummaryTitle" class="h4">Résumé des incidents</h2>
+        <div class="row">
+            <div class="col-md-4"><strong>Ouverts :</strong> <span th:text="${incidentSummary.openCount}">0</span></div>
+            <div class="col-md-4"><strong>En cours :</strong> <span th:text="${incidentSummary.inProgressCount}">0</span></div>
+            <div class="col-md-4"><strong>Clôturés :</strong> <span th:text="${incidentSummary.closedCount}">0</span></div>
+        </div>
+    </section>
+
     <div class="row mt-4">
         <div class="col-md-4 mb-3">
             <div class="card h-100">

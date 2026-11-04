@@ -77,4 +77,12 @@ class EvaluationServiceTest {
         assertTrue(evaluationService.ajouterEvaluation(12, 4, null).isEmpty());
         verify(evaluationRepository, never()).save(any(Evaluation.class));
     }
+
+    @Test
+    void rechercheLesEvaluationsParPrestataire() {
+        when(evaluationRepository.findByPrestataireId(7)).thenReturn(java.util.List.of());
+
+        assertTrue(evaluationService.getEvaluationsByPrestataire(7).isEmpty());
+        verify(evaluationRepository).findByPrestataireId(7);
+    }
 }

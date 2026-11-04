@@ -3,6 +3,7 @@ package altn72.project.modele;
 import org.jspecify.annotations.NullMarked;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,4 +20,22 @@ public interface IncidentRepository extends JpaRepository<Incident, Integer> {
 
     @EntityGraph(attributePaths = {"equipement", "agent", "prestataire"})
     List<Incident> findByStatusAndPrestataireIsNotNull(Incident.Status status);
+
+    @SuppressWarnings("SqlDialectInspection")
+    @Query(value = """
+            SELECT
+                COUNT(CASE WHEN statut = 'OUVERT' THEN 1 END) AS openCount,
+                COUNT(CASE WHEN statut = 'EN_COURS' THEN 1 END) AS inProgressCount,
+                COUNT(CASE WHEN statut = 'CLOTURE' THEN 1 END) AS closedCount
+            FROM incident
+            """, nativeQuery = true)
+    IncidentStatusSummary summarizeByStatus();
+
+    interface IncidentStatusSummary {
+        Long getOpenCount();
+
+        Long getInProgressCount();
+
+        Long getClosedCount();
+    }
 }

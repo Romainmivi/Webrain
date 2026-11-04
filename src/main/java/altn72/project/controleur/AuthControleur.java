@@ -1,12 +1,13 @@
 package altn72.project.controleur;
 
 import altn72.project.service.PersonneService;
+import altn72.project.service.IncidentService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
@@ -14,9 +15,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class AuthControleur {
 
     private final PersonneService personneService;
+    private final IncidentService incidentService;
 
-    public AuthControleur(PersonneService personneService) {
+    public AuthControleur(PersonneService personneService, IncidentService incidentService) {
         this.personneService = personneService;
+        this.incidentService = incidentService;
     }
 
     @GetMapping("/login")
@@ -44,12 +47,14 @@ public class AuthControleur {
     }
 
     @GetMapping("/dashboard/agent")
-    public String dashboardAgent() {
+    public String dashboardAgent(Model model) {
+        model.addAttribute("incidentSummary", incidentService.getDashboardSummary());
         return "agent/dashboardAgent";
     }
 
     @GetMapping("/dashboard/responsable")
-    public String dashboardResponsable() {
+    public String dashboardResponsable(Model model) {
+        model.addAttribute("incidentSummary", incidentService.getDashboardSummary());
         return "responsable/dashboardResponsable";
     }
 

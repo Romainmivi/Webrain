@@ -44,6 +44,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class DatabaseIntegrationIT {
 
     @Container
+    @SuppressWarnings("resource")
     private static final MySQLContainer<?> MYSQL = new MySQLContainer<>("mysql:8.4")
             .withDatabaseName("webrain_test")
             .withUsername("test")
@@ -128,6 +129,55 @@ class DatabaseIntegrationIT {
         assertEquals(1, resultats.size());
         assertEquals(eligible.incident().getId(), resultats.getFirst().getId());
         assertFalse(resultats.stream().anyMatch(incident -> incident.getStatus() != Incident.Status.CLOTURE));
+    }
+
+    @Test
+    @Transactional
+    void requeteNativeCalculeLeResumeDesIncidentsParStatut() {
+        Fixture open = creerFixture(true);
+        open.incident().setStatus(Incident.Status.OUVERT);
+        incidentRepository.saveAndFlush(open.incident());
+
+        Fixture inProgress = creerFixture(true);
+        inProgress.incident().setStatus(Incident.Status.EN_COURS);
+        incidentRepository.saveAndFlush(inProgress.incident());
+
+        Fixture closed = creerFixture(true);
+        closed.incident().setStatus(Incident.Status.CLOTURE);
+        incidentRepository.saveAndFlush(closed.incident());
+
+        IncidentRepository.IncidentStatusSummary summary = incidentRepository.summarizeByStatus();
+
+        assertEquals(1L, summary.getOpenCount());
+        assertEquals(1L, summary.getInProgressCount());
+        assertEquals(1L, summary.getClosedCount());
+    }
+
+    @Test
+    @Transactional
+    void requeteJpqlRetourneLesEvaluationsDuPrestataireDemande() {
+        Fixture evaluated = creerFixture(true);
+        Fixture otherProvider = creerFixture(true);
+        evaluationRepository.saveAndFlush(
+                Evaluation.creer(4, "Bon travail", LocalDateTime.now(), evaluated.incident())
+        );
+        evaluationRepository.saveAndFlush(
+                Evaluation.creer(2, "Autre prestataire", LocalDateTime.now(), otherProvider.incident())
+        );
+        entityManager.flush();
+        entityManager.clear();
+
+        List<Evaluation> evaluations =
+                evaluationRepository.findByPrestataireId(evaluated.prestataire().getId());
+
+        assertEquals(1, evaluations.size());
+        assertEquals(4, evaluations.getFirst().getNote());
+        assertEquals("Bon travail", evaluations.getFirst().getCommentaire());
+        assertEquals(
+                evaluated.prestataire().getId(),
+                evaluations.getFirst().getIncident().getPrestataire().getId()
+        );
+        assertTrue(Hibernate.isInitialized(evaluations.getFirst().getIncident().getEquipement()));
     }
 
     @Test

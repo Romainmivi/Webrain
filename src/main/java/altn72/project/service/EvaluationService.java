@@ -36,6 +36,11 @@ public class EvaluationService {
     }
 
     @Transactional(readOnly = true)
+    public List<Evaluation> getEvaluationsByPrestataire(Integer prestataireId) {
+        return evaluationRepository.findByPrestataireId(prestataireId);
+    }
+
+    @Transactional(readOnly = true)
     public List<Incident> getIncidentsEvaluables() {
         return incidentRepository.findByStatusAndPrestataireIsNotNull(Incident.Status.CLOTURE);
     }

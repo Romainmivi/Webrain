@@ -106,4 +106,14 @@ class IncidentServiceTest {
         assertFalse(incidentService.supprimerIncident(99));
         verify(incidentRepository, never()).deleteById(99);
     }
+
+    @Test
+    void retourneLeResumeDesIncidentsPourLeTableauDeBord() {
+        IncidentRepository.IncidentStatusSummary summary =
+                mock(IncidentRepository.IncidentStatusSummary.class);
+        when(incidentRepository.summarizeByStatus()).thenReturn(summary);
+
+        assertSame(summary, incidentService.getDashboardSummary());
+        verify(incidentRepository).summarizeByStatus();
+    }
 }

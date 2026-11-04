@@ -36,6 +36,31 @@
         <button type="button" class="btn btn-secondary" onclick="toggleEdit(false)">Annuler</button>
     </form>
 
+    <section class="mt-4">
+        <h2 class="h4">Évaluations reçues</h2>
+        <table class="table table-striped align-middle">
+            <thead>
+            <tr>
+                <th>Incident</th>
+                <th>Note</th>
+                <th>Commentaire</th>
+                <th>Date</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="evaluation : ${evaluations}">
+                <td th:text="${evaluation.incident.id}"></td>
+                <td th:text="${evaluation.note + ' / 5'}"></td>
+                <td th:text="${evaluation.commentaire ?: 'Aucun commentaire'}"></td>
+                <td th:text="${evaluation.date}"></td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(evaluations)}">
+                <td colspan="4" class="text-center text-muted">Aucune évaluation reçue.</td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+
     <hr>
     <a th:href="@{/api/prestataires/getPrestataires}">Retour à la liste des prestataires</a>
 </div>

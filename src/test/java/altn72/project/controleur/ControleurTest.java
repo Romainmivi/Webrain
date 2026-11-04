@@ -6,6 +6,8 @@ import altn72.project.service.IncidentService;
 import altn72.project.service.PersonneService;
 import altn72.project.service.PrestataireService;
 import altn72.project.service.StationService;
+import altn72.project.modele.Prestataire;
+import altn72.project.modele.IncidentRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.Authentication;
@@ -13,6 +15,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.ui.ExtendedModelMap;
 
 import java.util.Objects;
+import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -41,12 +45,18 @@ class ControleurTest {
 
     @Test
     void authControleurRetourneLesPagesEtRedirigeSelonLeRole() {
-        AuthControleur controleur = new AuthControleur(personneService);
+        IncidentRepository.IncidentStatusSummary summary =
+                mock(IncidentRepository.IncidentStatusSummary.class);
+        when(incidentService.getDashboardSummary()).thenReturn(summary);
+        AuthControleur controleur = new AuthControleur(personneService, incidentService);
+        ExtendedModelMap model = new ExtendedModelMap();
 
         assertEquals("login", controleur.loginPage());
         assertEquals("redirect:/login", controleur.dashboard(null));
-        assertEquals("agent/dashboardAgent", controleur.dashboardAgent());
-        assertEquals("responsable/dashboardResponsable", controleur.dashboardResponsable());
+        assertEquals("agent/dashboardAgent", controleur.dashboardAgent(model));
+        assertEquals(summary, model.getAttribute("incidentSummary"));
+        assertEquals("responsable/dashboardResponsable", controleur.dashboardResponsable(model));
+        assertEquals(summary, model.getAttribute("incidentSummary"));
         assertEquals("0 mot(s) de passe migré(s) vers BCrypt.", controleur.migrerMotsDePasse());
 
         Authentication agent = mock(Authentication.class);
@@ -119,13 +129,26 @@ class ControleurTest {
 
     @Test
     void prestataireControleurPrepareLeFormulaireEtLaListe() {
-        PrestataireControleur controleur = new PrestataireControleur(prestataireService);
+        PrestataireControleur controleur = new PrestataireControleur(prestataireService, evaluationService);
         ExtendedModelMap model = new ExtendedModelMap();
 
         assertEquals("prestataire/listePrestataires", controleur.getPrestataires(model));
         assertNotNull(model.getAttribute("prestataires"));
         assertEquals("prestataire/nouveauPrestataire", controleur.preparerAjoutPrestataire(model));
         assertNotNull(model.getAttribute("nouveauPrestataire"));
+    }
+
+    @Test
+    void prestataireControleurAfficheLesEvaluationsDuPrestataire() {
+        Prestataire prestataire = Prestataire.creer("Entreprise", "0123456789", "test@example.com");
+        when(prestataireService.getPrestataire(7)).thenReturn(Optional.of(prestataire));
+        when(evaluationService.getEvaluationsByPrestataire(7)).thenReturn(List.of());
+        PrestataireControleur controleur = new PrestataireControleur(prestataireService, evaluationService);
+        ExtendedModelMap model = new ExtendedModelMap();
+
+        assertEquals("prestataire/detailsPrestataire", controleur.getPrestataire(7, model));
+        assertEquals(prestataire, model.getAttribute("prestataire"));
+        assertEquals(List.of(), model.getAttribute("evaluations"));
     }
 
     @Test

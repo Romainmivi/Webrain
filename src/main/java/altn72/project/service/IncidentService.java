@@ -40,6 +40,11 @@ public class IncidentService {
         return incidentRepository.findAll();
     }
 
+    @Transactional(readOnly = true)
+    public IncidentRepository.IncidentStatusSummary getDashboardSummary() {
+        return incidentRepository.summarizeByStatus();
+    }
+
     @Transactional
     public Incident ajouterIncident(
             Integer equipementId,

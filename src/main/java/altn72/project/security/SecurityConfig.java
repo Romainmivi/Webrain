@@ -30,7 +30,10 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 // Routes publiques
-                .requestMatchers("/login", "/api/auth/**", "/css/**", "/js/**", "/images/**").permitAll()
+                .requestMatchers(
+                    "/login", "/api/auth/**", "/css/**", "/js/**", "/images/**",
+                    "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**"
+                ).permitAll()
                 // Dashboard selon le rôle
                 .requestMatchers("/dashboard/agent").hasRole("AGENT")
                 .requestMatchers("/dashboard/responsable").hasRole("RESPONSABLE")

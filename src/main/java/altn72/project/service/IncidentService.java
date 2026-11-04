@@ -1,6 +1,7 @@
 package altn72.project.service;
 
 import altn72.project.exception.RessourceIntrouvableException;
+import altn72.project.exception.RequeteInvalideException;
 import altn72.project.modele.Incident;
 import altn72.project.modele.IncidentRepository;
 import altn72.project.modele.Prestataire;
@@ -85,19 +86,34 @@ public class IncidentService {
             Prestataire prestataire
     ) {
         return incidentRepository.findById(id).map(incident -> {
-                Incident.Status ancienStatut = incident.getStatus();
                 incident.setDescription(description);
-                incident.setStatus(status);
+                mettreAJourStatut(incident, status);
                 incident.setPrestataire(prestataire);
-                if (status == Incident.Status.CLOTURE) {
-                    if (ancienStatut != Incident.Status.CLOTURE || incident.getDateCloture() == null) {
-                        incident.setDateCloture(LocalDateTime.now());
-                    }
-                } else {
-                    incident.setDateCloture(null);
-                }
                 return incident;
             });
+    }
+
+    @Transactional
+    public Incident modifierStatut(Integer id, Incident.Status nouveauStatut) {
+        if (nouveauStatut == null) {
+            throw new RequeteInvalideException("Le statut est obligatoire");
+        }
+        Incident incident = incidentRepository.findById(id)
+                .orElseThrow(() -> new RessourceIntrouvableException("Incident", id));
+        mettreAJourStatut(incident, nouveauStatut);
+        return incidentRepository.save(incident);
+    }
+
+    private void mettreAJourStatut(Incident incident, Incident.Status nouveauStatut) {
+        Incident.Status ancienStatut = incident.getStatus();
+        incident.setStatus(nouveauStatut);
+        if (nouveauStatut == Incident.Status.CLOTURE) {
+            if (ancienStatut != Incident.Status.CLOTURE || incident.getDateCloture() == null) {
+                incident.setDateCloture(LocalDateTime.now());
+            }
+        } else {
+            incident.setDateCloture(null);
+        }
     }
 
     @Transactional

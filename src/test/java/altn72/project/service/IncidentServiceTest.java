@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -98,6 +99,37 @@ class IncidentServiceTest {
                 .orElseThrow();
         assertEquals(Incident.Status.EN_COURS, incident.getStatus());
         assertNull(incident.getDateCloture());
+    }
+
+    @Test
+    void modifieLeStatutEtGereLaDateDeCloture() {
+        Incident incident = new Incident(equipement, "Panne", LocalDateTime.now(), agent);
+        when(incidentRepository.findById(5)).thenReturn(Optional.of(incident));
+        when(incidentRepository.save(any(Incident.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        Incident cloture = incidentService.modifierStatut(5, Incident.Status.CLOTURE);
+
+        assertSame(incident, cloture);
+        assertEquals(Incident.Status.CLOTURE, cloture.getStatus());
+        assertNotNull(cloture.getDateCloture());
+
+        Incident reouvert = incidentService.modifierStatut(5, Incident.Status.EN_COURS);
+
+        assertEquals(Incident.Status.EN_COURS, reouvert.getStatus());
+        assertNull(reouvert.getDateCloture());
+        verify(incidentRepository, times(2)).save(incident);
+    }
+
+    @Test
+    void signaleUnIncidentAbsentLorsDuChangementDeStatut() {
+        when(incidentRepository.findById(404)).thenReturn(Optional.empty());
+
+        assertThrows(
+                RessourceIntrouvableException.class,
+                () -> incidentService.modifierStatut(404, Incident.Status.CLOTURE)
+        );
+        verify(incidentRepository, never()).save(any(Incident.class));
     }
 
     @Test

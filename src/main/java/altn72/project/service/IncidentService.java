@@ -1,8 +1,11 @@
 package altn72.project.service;
 
+import altn72.project.evenement.IncidentChangeEvent;
 import altn72.project.exception.RessourceIntrouvableException;
 import altn72.project.exception.RequeteInvalideException;
 import altn72.project.modele.Incident;
+import altn72.project.modele.IncidentEvent;
+import altn72.project.modele.IncidentEventRepository;
 import altn72.project.modele.IncidentRepository;
 import altn72.project.modele.Prestataire;
 import altn72.project.modele.PrestataireRepository;
@@ -10,6 +13,7 @@ import altn72.project.modele.equipements.Equipement;
 import altn72.project.modele.equipements.EquipementRepository;
 import altn72.project.modele.personnes.Agent;
 import altn72.project.modele.personnes.AgentRepository;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,17 +28,23 @@ public class IncidentService {
     private final EquipementRepository equipementRepository;
     private final AgentRepository agentRepository;
     private final PrestataireRepository prestataireRepository;
+    private final IncidentEventRepository incidentEventRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     public IncidentService(
             IncidentRepository incidentRepository,
             EquipementRepository equipementRepository,
             AgentRepository agentRepository,
-            PrestataireRepository prestataireRepository
+            PrestataireRepository prestataireRepository,
+            IncidentEventRepository incidentEventRepository,
+            ApplicationEventPublisher eventPublisher
     ) {
         this.incidentRepository = incidentRepository;
         this.equipementRepository = equipementRepository;
         this.agentRepository = agentRepository;
         this.prestataireRepository = prestataireRepository;
+        this.incidentEventRepository = incidentEventRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     @Transactional(readOnly = true)
@@ -70,12 +80,30 @@ public class IncidentService {
                 prestataire,
                 agent
         );
-        return incidentRepository.save(incident);
+        Incident savedIncident = incidentRepository.save(incident);
+
+        // Publier l'événement de création
+        eventPublisher.publishEvent(new IncidentChangeEvent(
+                this,
+                savedIncident.getId(),
+                description,
+                IncidentChangeEvent.ChangeType.INCIDENT_CREE,
+                "Incident créé par " + agent.getPrenom() + " " + agent.getNom() + " pour l'équipement " + equipement.getDescription(),
+                LocalDateTime.now(),
+                agent
+        ));
+
+        return savedIncident;
     }
 
     @Transactional(readOnly = true)
     public Optional<Incident> getIncident(Integer id) {
         return incidentRepository.findWithDetailsById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public List<IncidentEvent> getHistorique(Integer incidentId) {
+        return incidentEventRepository.findByIncidentIdOrderByDateDesc(incidentId);
     }
 
     @Transactional
@@ -86,10 +114,64 @@ public class IncidentService {
             Prestataire prestataire
     ) {
         return incidentRepository.findById(id).map(incident -> {
+                String ancienneDescription = incident.getDescription();
+                Incident.Status ancienStatut = incident.getStatus();
+                Prestataire ancienPrestataire = incident.getPrestataire();
+
                 incident.setDescription(description);
                 mettreAJourStatut(incident, status);
                 incident.setPrestataire(prestataire);
-                return incident;
+
+                Incident savedIncident = incidentRepository.save(incident);
+
+                // Publier les événements pour chaque changement
+                if (!ancienneDescription.equals(description)) {
+                    eventPublisher.publishEvent(new IncidentChangeEvent(
+                            this,
+                            savedIncident.getId(),
+                            savedIncident.getDescription(),
+                            IncidentChangeEvent.ChangeType.DESCRIPTION_MODIFIEE,
+                            "Description modifiée par " + incident.getAgent().getPrenom() + " " + incident.getAgent().getNom() + " : \"" + ancienneDescription.substring(0, Math.min(ancienneDescription.length(), 100)) + "...\" → \"" + description.substring(0, Math.min(description.length(), 100)) + "...\"",
+                            LocalDateTime.now(),
+                            incident.getAgent()
+                    ));
+                }
+
+                if (ancienStatut != status) {
+                    eventPublisher.publishEvent(new IncidentChangeEvent(
+                            this,
+                            savedIncident.getId(),
+                            savedIncident.getDescription(),
+                            IncidentChangeEvent.ChangeType.STATUT_MODIFIE,
+                            "Statut modifié de " + ancienStatut + " à " + status + " par " + incident.getAgent().getPrenom() + " " + incident.getAgent().getNom(),
+                            LocalDateTime.now(),
+                            incident.getAgent()
+                    ));
+                }
+
+                if (prestataire != null && (ancienPrestataire == null || !prestataire.getId().equals(ancienPrestataire.getId()))) {
+                    eventPublisher.publishEvent(new IncidentChangeEvent(
+                            this,
+                            savedIncident.getId(),
+                            savedIncident.getDescription(),
+                            IncidentChangeEvent.ChangeType.PRESTATAIRE_AFFECTE,
+                            "Prestataire affecté : " + prestataire.getNom() + " par " + incident.getAgent().getPrenom() + " " + incident.getAgent().getNom(),
+                            LocalDateTime.now(),
+                            incident.getAgent()
+                    ));
+                } else if (prestataire == null && ancienPrestataire != null) {
+                    eventPublisher.publishEvent(new IncidentChangeEvent(
+                            this,
+                            savedIncident.getId(),
+                            savedIncident.getDescription(),
+                            IncidentChangeEvent.ChangeType.PRESTATAIRE_DESACTIVER,
+                            "Prestataire désactivé : " + ancienPrestataire.getNom() + " par " + incident.getAgent().getPrenom() + " " + incident.getAgent().getNom(),
+                            LocalDateTime.now(),
+                            incident.getAgent()
+                    ));
+                }
+
+                return savedIncident;
             });
     }
 
@@ -100,8 +182,22 @@ public class IncidentService {
         }
         Incident incident = incidentRepository.findById(id)
                 .orElseThrow(() -> new RessourceIntrouvableException("Incident", id));
+        Incident.Status ancienStatut = incident.getStatus();
         mettreAJourStatut(incident, nouveauStatut);
-        return incidentRepository.save(incident);
+        Incident savedIncident = incidentRepository.save(incident);
+
+        // Publier l'événement de changement de statut
+        eventPublisher.publishEvent(new IncidentChangeEvent(
+                this,
+                savedIncident.getId(),
+                savedIncident.getDescription(),
+                IncidentChangeEvent.ChangeType.STATUT_MODIFIE,
+                "Statut modifié de " + ancienStatut + " à " + nouveauStatut + " par " + incident.getAgent().getPrenom() + " " + incident.getAgent().getNom(),
+                LocalDateTime.now(),
+                incident.getAgent()
+        ));
+
+        return savedIncident;
     }
 
     private void mettreAJourStatut(Incident incident, Incident.Status nouveauStatut) {
@@ -120,6 +216,20 @@ public class IncidentService {
     public boolean supprimerIncident(Integer id) {
         if (!incidentRepository.existsById(id)) {
             return false;
+        }
+        Incident incident = incidentRepository.findWithDetailsById(id)
+                .orElse(null);
+        if (incident != null) {
+            // Publier l'événement de suppression avant de supprimer
+            eventPublisher.publishEvent(new IncidentChangeEvent(
+                    this,
+                    id,
+                    incident.getDescription(),
+                    IncidentChangeEvent.ChangeType.INCIDENT_SUPPRIME,
+                    "Incident supprimé par " + incident.getAgent().getPrenom() + " " + incident.getAgent().getNom(),
+                    LocalDateTime.now(),
+                    incident.getAgent()
+            ));
         }
         incidentRepository.deleteById(id);
         return true;

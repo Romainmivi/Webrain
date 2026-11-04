@@ -2,6 +2,7 @@ package altn72.project.service;
 
 import altn72.project.exception.RessourceIntrouvableException;
 import altn72.project.modele.Incident;
+import altn72.project.modele.IncidentEventRepository;
 import altn72.project.modele.IncidentRepository;
 import altn72.project.modele.Prestataire;
 import altn72.project.modele.PrestataireRepository;
@@ -13,6 +14,7 @@ import altn72.project.modele.personnes.Agent;
 import altn72.project.modele.personnes.AgentRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -36,6 +38,8 @@ class IncidentServiceTest {
     private IncidentRepository incidentRepository;
     private EquipementRepository equipementRepository;
     private PrestataireRepository prestataireRepository;
+    private IncidentEventRepository incidentEventRepository;
+    private ApplicationEventPublisher eventPublisher;
     private IncidentService incidentService;
     private Equipement equipement;
     private Agent agent;
@@ -47,8 +51,11 @@ class IncidentServiceTest {
         equipementRepository = mock(EquipementRepository.class);
         AgentRepository agentRepository = mock(AgentRepository.class);
         prestataireRepository = mock(PrestataireRepository.class);
+        incidentEventRepository = mock(IncidentEventRepository.class);
+        eventPublisher = mock(ApplicationEventPublisher.class);
         incidentService = new IncidentService(
-                incidentRepository, equipementRepository, agentRepository, prestataireRepository);
+                incidentRepository, equipementRepository, agentRepository, prestataireRepository,
+                incidentEventRepository, eventPublisher);
         equipement = new Ascenseur(
                 "Ascenseur", TypeEquipement.ASCENSEUR, null, Equipement.Etat.EN_MARCHE);
         agent = new Agent("agent", "hash", "Alex", "Martin");
@@ -138,6 +145,18 @@ class IncidentServiceTest {
 
         assertFalse(incidentService.supprimerIncident(99));
         verify(incidentRepository, never()).deleteById(99);
+    }
+
+    @Test
+    void supprimeUnIncidentExistant() {
+        Incident incident = new Incident(equipement, "Panne", LocalDateTime.now(), agent);
+        when(incidentRepository.existsById(10)).thenReturn(true);
+        when(incidentRepository.findWithDetailsById(10)).thenReturn(Optional.of(incident));
+        when(incidentRepository.save(any(Incident.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        assertTrue(incidentService.supprimerIncident(10));
+        verify(incidentRepository).deleteById(10);
     }
 
     @Test

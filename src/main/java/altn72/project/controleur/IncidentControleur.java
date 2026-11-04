@@ -2,6 +2,7 @@ package altn72.project.controleur;
 
 import altn72.project.exception.RessourceIntrouvableException;
 import altn72.project.modele.Incident;
+import altn72.project.modele.IncidentEvent;
 import altn72.project.modele.Prestataire;
 import altn72.project.service.IncidentService;
 import altn72.project.service.EquipementService;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
+import java.util.ArrayList;
 
 @Controller
 @RequestMapping("/api/incidents")
@@ -80,6 +82,11 @@ public class IncidentControleur {
         model.addAttribute("statutsIncident", Incident.Status.values());
         model.addAttribute("prestataires", prestataireService.getPrestataires());
         model.addAttribute("incidentEvaluable", incident.getStatus() == Incident.Status.CLOTURE && incident.getPrestataire() != null);
+
+        // Charger l'historique des événements
+        List<IncidentEvent> historique = incidentService.getHistorique(id);
+        model.addAttribute("historique", historique);
+
         return "incident/detailsIncident";
     }
 

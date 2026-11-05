@@ -1,9 +1,10 @@
 # Journal — Webrain (ALTN72, 2026-27)
 **Groupe :** Romain MILLET, Julien OUDIN
-## README
+## LANCEMENT
 - Initialiser la base : utiliser le script `db/create.sql`
 - Remplir la base avec le jeu de données : utiliser le script `db/data_demo.sql`
-- Lancer : `mvn spring-boot:run`
+- Lancer : `./run.sh`
+  		Nous avons eu des problèmes de lancement liées aux variables d'environnement. Le fichier .env est disponible sur le dépôt Moodle, sur ce git, il n'exitera pas pour des questions de sécurité. Toutefois, ces variales sont définies sur GitHub
 - Application déployée : https://localhost:8080 (le reste de la route ne compte pas, l'utilisateur est redirigé vers le login qui renvoie sur le dashboard après)
 - Compte de test :
 	- Responsable :
@@ -339,11 +340,45 @@ L'absence d'interfaces métier rendrait ces changements plus difficiles.
 
 ## LOT ALPHA
 ### Fonctionnalité transverse 5 - Journal métier 
-
-- Historique persistant des créations, changements de statut, modifications de description, affectations de prestataire et suppressions d'incidents. Les événements sont publiés par `IncidentService` puis enregistrés par `IncidentChangeListener` dans `incident_event`.
-
+Le journal d'actions enregistre chaque modification apportée à un incident. Il repose sur un mécanisme d'événements Spring (ApplicationEventPublisher / @EventListener) pour garantir que chaque action est consignée de manière asynchrone et transactionnelle (REQUIRES_NEW).
+- Ce qui est tracé :
+- Création d'un incident
+- Modification du statut (ex. : EN_COURS → CLOTURE)
+- Modification de la description
+- Affectation d'un prestataire
+- Désaffectation d'un prestataire
+- Suppression d'un incident
+Chaque entrée du journal contient la date de l'événement, le type d'action, une description détaillée et l'agent responsable. Le journal est accessible depuis la fiche d'un incident et est en lecture seule — aucune action ne peut être effacée ou modifiée a posteriori, ce qui garantit l'intégrité de l'historique.
+Implémentation : IncidentChangeListener écoute les événements IncidentChangeEvent publiés par IncidentService et persiste chaque événement dans la table IncidentEvent. Même en cas de suppression d'incident, un enregistrement est conservé via un proxy JPA (EntityManager.getReference).
+ 
 ### Fonctionnalité transverse 9 - Import / export de données
-- L'import et l'export des stations au format CSV sont disponibles via `ImportExportControleur` et `ImportExportService`. Le script de création du schéma comprend aussi la table `incident_event`.
+Cette fonctionnalité permet d'exporter et d'importer les données des stations au format CSV, facilitant la migration, la sauvegarde ou l'initialisation de la base de données.
+Export :
+Téléchargez un fichier stations.csv contenant toutes les stations (id, nom, adresse, ville, latitude, longitude).
+Le fichier utilise le séparateur ; et l'encodage UTF-8.
+Accès via l'endpoint GET /api/import-export/exporter.
+Import :
+Téléversez un fichier CSV respectant le même format.
+Les stations existantes sont mises à jour, les nouvelles sont créées.
+Un rapport détaillé est affiché après l'import : nombre de stations créées, mises à jour, et la liste des erreurs éventuelles (lignes invalides).
+Accès via l'endpoint POST /api/import-export/importer.
+Implémentation : ImportExportService utilise la bibliothèque Apache Commons CSV pour parser et générer les fichiers. Le contrôleur ImportExportControleur valide le type de fichier (extension .csv et type MIME) avant traitement.
+
+
+### Evolution B : Surveillance des prestataires
+Le système de surveillance permet de détecter automatiquement les prestataires mal notés 
+Fonctionnement :
+Pour chaque prestataire, les 5 dernières évaluations sont analysées (fenètre glissante).
+La moyenne de ces notes est calculée.
+Si la moyenne est inférieure à 3.0/5, le prestataire est automatiquement placé sous surveillance.
+S'il y a moins de 5 évaluations le statut de surveillance ne peut pas être déterminé.
+
+Lorsqu'un responsable tente d'affecter un prestataire sous surveillance à un nouvel incident, le système exige une confirmation explicite avant de valider l'affectation.
+Une exception ConfirmationSurveillanceRequiseException est levée si la case de confirmation n'est pas cochée.
+Le statut « sous surveillance » est visible sur la fiche du prestataire et dans la liste des prestataires.
+
+Implémentation : PrestataireSurveillanceService calcule l'état de surveillance via analyser(prestataireId) en interrogeant les notes récentes via EvaluationRepository.findRecentNotesByPrestataireId. Le contrôleur IncidentControleur intègre cette vérification lors de la création et de la modification d'incidents.
+- Historique persistant des créations, changements de statut, modifications de description, affectations de prestataire et suppressions d'incidents. Les événements sont publiés par `IncidentService` puis enregistrés par `IncidentChangeListener` dans `incident_event`.
 
 ## BILAN
 - Contribution de chacun :
@@ -363,7 +398,41 @@ L'absence d'interfaces métier rendrait ces changements plus difficiles.
   	  	- Application de ces droits (F1, login des users et responsables)
   	  	- Livraison des deux fonctionnalités alpha (5 et 9)
   	  	- Tests unitaires mis à jour
-  	  	- co-écriture de la feature de la dernière séance  	
+  	  	- co-écriture de la feature de la dernière séance  	Le journal d'actions est un système de traçabilité automatique qui enregistre chaque modification apportée à un incident. Il repose sur un mécanisme d'événements Spring (ApplicationEventPublisher / @EventListener) pour garantir que chaque action est consignée de manière asynchrone et transactionnelle (REQUIRES_NEW).
+Ce qui est tracé :
+Création d'un incident
+Modification du statut (ex. : EN_COURS → CLOTURE)
+Modification de la description
+Affectation d'un prestataire
+Désaffectation d'un prestataire
+Suppression d'un incident
+Chaque entrée du journal contient la date de l'événement, le type d'action, une description détaillée et l'agent responsable. Le journal est accessible depuis la fiche d'un incident et est en lecture seule — aucune action ne peut être effacée ou modifiée a posteriori, ce qui garantit l'intégrité de l'historique.
+Implémentation : IncidentChangeListener écoute les événements IncidentChangeEvent publiés par IncidentService et persiste chaque événement dans la table IncidentEvent. Même en cas de suppression d'incident, un enregistrement est conservé via un proxy JPA (EntityManager.getReference).
+ 
+📊 Export / Import CSV (Alpha)
+Cette fonctionnalité permet d'exporter et d'importer les données des stations au format CSV, facilitant la migration, la sauvegarde ou l'initialisation de la base de données.
+Export :
+Téléchargez un fichier stations.csv contenant toutes les stations (id, nom, adresse, ville, latitude, longitude).
+Le fichier utilise le séparateur ; et l'encodage UTF-8.
+Accès via l'endpoint GET /api/import-export/exporter.
+Import :
+Téléversez un fichier CSV respectant le même format.
+Les stations existantes sont mises à jour, les nouvelles sont créées.
+Un rapport détaillé est affiché après l'import : nombre de stations créées, mises à jour, et la liste des erreurs éventuelles (lignes invalides).
+Accès via l'endpoint POST /api/import-export/importer.
+Implémentation : ImportExportService utilise la bibliothèque Apache Commons CSV pour parser et générer les fichiers. Le contrôleur ImportExportControleur valide le type de fichier (extension .csv et type MIME) avant traitement.
+ 
+🔍 Surveillance de prestataire
+Le système de surveillance permet de détecter automatiquement les prestataires dont la qualité de service se dégrade, en analysant la tendance de leurs dernières évaluations.
+Fonctionnement :
+Pour chaque prestataire, les 5 dernières évaluations sont analysées (fenètre glissante).
+La moyenne de ces notes est calculée.
+Si la moyenne est inférieure à 3.0/5, le prestataire est automatiquement placé sous surveillance.
+Moins de 5 évaluations ? Le statut de surveillance ne peut pas être déterminé.
+Impact concret :
+Lorsqu'un responsable tente d'affecter un prestataire sous surveillance à un nouvel incident, le système exige une confirmation explicite avant de valider l'affectation.
+Une exception ConfirmationSurveillanceRequiseException est levée si la case de confirmation n'est pas cochée.
+Le statut « sous surveillance » est visible sur la fiche du prestataire et dans la liste des prestataires.
 - Plus grande difficulté et comment elle a été surmontée :
 	- Organisation du projet :
 Nous nous sommes rendu compte trop tard de la proximité de la deadline, entrainant une surcharge lors de la dernière semaine en compensant.

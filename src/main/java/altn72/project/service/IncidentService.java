@@ -234,22 +234,17 @@ public class IncidentService {
 
     @Transactional
     public boolean supprimerIncident(Integer id) {
-        if (!incidentRepository.existsById(id)) {
+        Incident incident = incidentRepository.findWithDetailsById(id).orElse(null);
+        if (incident == null) {
             return false;
         }
-        Incident incident = incidentRepository.findWithDetailsById(id)
-                .orElse(null);
-        if (incident != null) {
-            eventPublisher.publishEvent(new IncidentChangeEvent(
-                    this,
-                    id,
-                    IncidentChangeEvent.ChangeType.INCIDENT_SUPPRIME,
-                    "Incident supprimé par " + incident.getAgent().getPrenom() + " " + incident.getAgent().getNom(),
-                    LocalDateTime.now(),
-                    incident.getAgent()
-            ));
+        if (evaluationRepository.existsByIncident_Id(id)) {
+            throw new RegleMetierException(
+                    "Impossible de supprimer cet incident : il possède une évaluation qui doit être conservée");
         }
-        incidentRepository.deleteById(id);
+
+        incidentEventRepository.deleteByIncidentId(id);
+        incidentRepository.delete(incident);
         return true;
     }
 

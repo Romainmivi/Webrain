@@ -5,6 +5,7 @@ import altn72.project.exception.RessourceIntrouvableException;
 import altn72.project.modele.Prestataire;
 import altn72.project.service.EvaluationService;
 import altn72.project.service.PrestataireService;
+import altn72.project.service.PrestataireSurveillanceService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -23,13 +24,16 @@ public class PrestataireControleur {
 
     private final PrestataireService prestataireService;
     private final EvaluationService evaluationService;
+    private final PrestataireSurveillanceService prestataireSurveillanceService;
 
     public PrestataireControleur(
             PrestataireService prestataireService,
-            EvaluationService evaluationService
+            EvaluationService evaluationService,
+            PrestataireSurveillanceService prestataireSurveillanceService
     ) {
         this.prestataireService = prestataireService;
         this.evaluationService = evaluationService;
+        this.prestataireSurveillanceService = prestataireSurveillanceService;
     }
 
     @GetMapping("/getPrestataires")
@@ -76,6 +80,7 @@ public class PrestataireControleur {
                 "evaluations",
                 evaluationService.getEvaluationsByPrestataire(id)
         );
+        model.addAttribute("etatSurveillance", prestataireSurveillanceService.analyser(id));
         return "prestataire/detailsPrestataire";
     }
 

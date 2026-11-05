@@ -11,7 +11,7 @@ import java.util.Optional;
 public interface IncidentRepository extends JpaRepository<Incident, Integer> {
 
     @Override
-    @EntityGraph(attributePaths = {"equipement", "agent", "prestataire"})
+    @EntityGraph(attributePaths = {"equipement", "equipement.station", "agent", "prestataire"})
     @NullMarked
     List<Incident> findAll();
 

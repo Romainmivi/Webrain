@@ -18,6 +18,17 @@
             <dd class="col-sm-9" th:text="${prestataire.numTelephone}"></dd>
             <dt class="col-sm-3">Email</dt>
             <dd class="col-sm-9" th:text="${prestataire.email}"></dd>
+            <dt class="col-sm-3">Moyenne des 5 dernières évaluations</dt>
+            <dd class="col-sm-9">
+                <span th:if="${etatSurveillance.moyenneDernieresEvaluations != null}"
+                      th:text="${#numbers.formatDecimal(etatSurveillance.moyenneDernieresEvaluations, 1, 1) + ' / 5'}"></span>
+                <span th:unless="${etatSurveillance.moyenneDernieresEvaluations != null}">
+                    Non calculée (moins de 5 évaluations)
+                </span>
+                <span th:if="${etatSurveillance.sousSurveillance}" class="badge text-bg-warning ms-2">
+                    sous surveillance
+                </span>
+            </dd>
         </dl>
         <button type="button" class="btn btn-primary" onclick="toggleEdit(true)">Modifier</button>
     </section>

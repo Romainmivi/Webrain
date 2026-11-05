@@ -11,6 +11,7 @@ import altn72.project.service.EquipementService;
 import altn72.project.service.PersonneService;
 import altn72.project.service.PrestataireService;
 import altn72.project.service.PrestataireSurveillanceService;
+import altn72.project.service.StationService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -32,19 +33,22 @@ public class IncidentControleur {
     private final PersonneService personneService;
     private final PrestataireService prestataireService;
     private final PrestataireSurveillanceService prestataireSurveillanceService;
+    private final StationService stationService;
 
     public IncidentControleur(
             IncidentService incidentService,
             EquipementService equipementService,
             PersonneService personneService,
             PrestataireService prestataireService,
-            PrestataireSurveillanceService prestataireSurveillanceService
+            PrestataireSurveillanceService prestataireSurveillanceService,
+            StationService stationService
     ) {
         this.incidentService = incidentService;
         this.equipementService = equipementService;
         this.personneService = personneService;
         this.prestataireService = prestataireService;
         this.prestataireSurveillanceService = prestataireSurveillanceService;
+        this.stationService = stationService;
     }
 
     @GetMapping("/getIncidents")
@@ -56,7 +60,7 @@ public class IncidentControleur {
 
     @GetMapping("/incident/nouveau")
     public String preparerAjoutIncident(Model model) {
-        preparerFormulaireNouvelIncident(model, new IncidentRequest(null, null, null, "", false));
+        preparerFormulaireNouvelIncident(model, new IncidentRequest(null, null, null, "", false, null));
         return "incident/nouvelIncident";
     }
 
@@ -90,7 +94,8 @@ public class IncidentControleur {
                     request.agentId(),
                     request.prestataireId(),
                     request.description().trim(),
-                    false
+                    false,
+                    request.stationId()
             ));
             model.addAttribute("confirmationSurveillanceRequise", true);
             model.addAttribute("erreurSurveillance", exception.getMessage());
@@ -169,7 +174,8 @@ public class IncidentControleur {
             Integer agentId,
             Integer prestataireId,
             String description,
-            Boolean confirmationSurveillance
+            Boolean confirmationSurveillance,
+            Integer stationId
     ) {
     }
 
@@ -184,6 +190,7 @@ public class IncidentControleur {
     private void preparerFormulaireNouvelIncident(Model model, IncidentRequest request) {
         model.addAttribute("nouvelIncident", request);
         model.addAttribute("equipements", equipementService.getEquipements());
+        model.addAttribute("stations", stationService.getStations());
         model.addAttribute("agents", personneService.getAgents());
         model.addAttribute("prestataires", prestataireSurveillanceService.listerPrestataires());
     }

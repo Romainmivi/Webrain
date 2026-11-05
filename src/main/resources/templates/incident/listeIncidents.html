@@ -14,6 +14,7 @@
         <thead>
         <tr>
             <th>Id</th>
+            <th>Station</th>
             <th>Équipement</th>
             <th>Agent</th>
             <th>Prestataire</th>
@@ -27,6 +28,7 @@
         <tbody>
         <tr th:each="incident : ${incidents}">
             <td th:text="${incident.id}"></td>
+            <td th:text="${incident.equipement.station.nom + ' (' + incident.equipement.station.ville + ')'}"></td>
             <td th:text="${incident.equipement.id + ' - ' + incident.equipement.description}"></td>
             <td th:text="${incident.agent.prenom + ' ' + incident.agent.nom}"></td>
             <td th:text="${incident.prestataire != null ? incident.prestataire.nom : '-'}"></td>
@@ -48,7 +50,7 @@
             </td>
         </tr>
         <tr th:if="${#lists.isEmpty(incidents)}">
-            <td colspan="9" class="text-center text-muted">Aucun incident.</td>
+            <td colspan="10" class="text-center text-muted">Aucun incident.</td>
         </tr>
         </tbody>
     </table>

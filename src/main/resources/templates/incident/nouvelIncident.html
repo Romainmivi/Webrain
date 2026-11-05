@@ -13,11 +13,23 @@
     <form th:action="@{/api/incidents/addIncident}"
           th:object="${nouvelIncident}"
           method="POST">
+        <label class="form-label" for="stationId">Station</label>
+        <select th:field="*{stationId}" id="stationId" class="form-select mb-3 w-50" required>
+            <option value="" disabled>Choisir une station</option>
+            <option th:each="station : ${stations}"
+                    th:value="${station.id}"
+                    th:text="${station.nom + ' (' + station.ville + ')'}">
+            </option>
+        </select>
+
         <label class="form-label" for="equipementId">Équipement</label>
-        <select th:field="*{equipementId}" class="form-select mb-3 w-50" required>
+        <select th:field="*{equipementId}" id="equipementId"
+                class="form-select mb-3 w-50" required
+                th:disabled="${nouvelIncident.stationId == null}">
             <option value="" disabled>Choisir un équipement</option>
             <option th:each="equipement : ${equipements}"
                     th:value="${equipement.id}"
+                    th:attr="data-station-id=${equipement.station.id}"
                     th:text="${equipement.id + ' - ' + equipement.description}">
             </option>
         </select>
@@ -60,5 +72,35 @@
     <hr>
     <a th:href="@{/api/incidents/getIncidents}">Afficher la liste des incidents</a>
 </div>
+<script>
+    const stationSelect = document.getElementById("stationId");
+    const equipmentSelect = document.getElementById("equipementId");
+
+    function filterEquipmentByStation() {
+        const stationId = stationSelect.value;
+        let selectedEquipmentIsAvailable = false;
+
+        Array.from(equipmentSelect.options).forEach(option => {
+            if (!option.value) {
+                return;
+            }
+
+            const available = stationId !== "" && option.dataset.stationId === stationId;
+            option.hidden = !available;
+            option.disabled = !available;
+            if (option.selected && available) {
+                selectedEquipmentIsAvailable = true;
+            }
+        });
+
+        if (!selectedEquipmentIsAvailable) {
+            equipmentSelect.value = "";
+        }
+        equipmentSelect.disabled = stationId === "";
+    }
+
+    stationSelect.addEventListener("change", filterEquipmentByStation);
+    filterEquipmentByStation();
+</script>
 </body>
 </html>

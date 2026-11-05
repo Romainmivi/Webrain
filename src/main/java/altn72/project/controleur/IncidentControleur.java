@@ -81,7 +81,7 @@ public class IncidentControleur {
                     request.agentId(),
                     request.prestataireId(),
                     request.description().trim(),
-                    request.confirmationSurveillance()
+                    Boolean.TRUE.equals(request.confirmationSurveillance())
             );
             return "redirect:/api/incidents/getIncident/" + incident.getId();
         } catch (ConfirmationSurveillanceRequiseException exception) {
@@ -137,7 +137,7 @@ public class IncidentControleur {
                             request.description().trim(),
                             request.status(),
                             prestataire,
-                            request.confirmationSurveillance()
+                            Boolean.TRUE.equals(request.confirmationSurveillance())
                     )
                     .orElseThrow(() -> new RessourceIntrouvableException("Incident", id));
             return "redirect:/api/incidents/getIncident/" + id;
@@ -169,7 +169,7 @@ public class IncidentControleur {
             Integer agentId,
             Integer prestataireId,
             String description,
-            boolean confirmationSurveillance
+            Boolean confirmationSurveillance
     ) {
     }
 
@@ -177,7 +177,7 @@ public class IncidentControleur {
             String description,
             Incident.Status status,
             Integer prestataireId,
-            boolean confirmationSurveillance
+            Boolean confirmationSurveillance
     ) {
     }
 

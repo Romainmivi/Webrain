@@ -43,6 +43,7 @@ class EvaluationServiceTest {
         when(incident.getStatus()).thenReturn(Incident.Status.CLOTURE);
         when(incident.getPrestataire()).thenReturn(Prestataire.creer("Prestataire", "0123456789", "test@example.com"));
         when(incidentRepository.findWithDetailsById(12)).thenReturn(Optional.of(incident));
+        when(evaluationRepository.existsByIncident_Id(12)).thenReturn(false);
         when(evaluationRepository.save(any(Evaluation.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
         LocalDateTime avantCreation = LocalDateTime.now();
@@ -83,6 +84,32 @@ class EvaluationServiceTest {
                 () -> evaluationService.ajouterEvaluation(12, 4, null)
         );
         verify(evaluationRepository, never()).save(any(Evaluation.class));
+    }
+
+    @Test
+    void refuseDevaluerUneSecondeFoisUnIncident() {
+        Incident incident = mock(Incident.class);
+        when(incident.getStatus()).thenReturn(Incident.Status.CLOTURE);
+        when(incident.getPrestataire()).thenReturn(
+                Prestataire.creer("Prestataire", "0123456789", "test@example.com"));
+        when(incidentRepository.findWithDetailsById(12)).thenReturn(Optional.of(incident));
+        when(evaluationRepository.existsByIncident_Id(12)).thenReturn(true);
+
+        assertThrows(
+                RegleMetierException.class,
+                () -> evaluationService.ajouterEvaluation(12, 4, "Deuxième avis")
+        );
+        verify(evaluationRepository, never()).save(any(Evaluation.class));
+    }
+
+    @Test
+    void neRetourneQueLesIncidentsCloturesAvecPrestataireNonEncoreEvalues() {
+        java.util.List<Incident> incidentsEvaluables = java.util.List.of(mock(Incident.class));
+        when(incidentRepository.findEvaluablesByStatus(Incident.Status.CLOTURE))
+                .thenReturn(incidentsEvaluables);
+
+        assertSame(incidentsEvaluables, evaluationService.getIncidentsEvaluables());
+        verify(incidentRepository).findEvaluablesByStatus(Incident.Status.CLOTURE);
     }
 
     @Test

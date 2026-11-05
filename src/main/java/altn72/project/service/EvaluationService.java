@@ -44,7 +44,7 @@ public class EvaluationService {
 
     @Transactional(readOnly = true)
     public List<Incident> getIncidentsEvaluables() {
-        return incidentRepository.findByStatusAndPrestataireIsNotNull(Incident.Status.CLOTURE);
+        return incidentRepository.findEvaluablesByStatus(Incident.Status.CLOTURE);
     }
 
     @Transactional
@@ -54,6 +54,9 @@ public class EvaluationService {
         if (incident.getStatus() != Incident.Status.CLOTURE || incident.getPrestataire() == null) {
             throw new RegleMetierException(
                     "Une évaluation exige un incident clôturé avec un prestataire affecté");
+        }
+        if (evaluationRepository.existsByIncident_Id(incidentId)) {
+            throw new RegleMetierException("Cet incident a déjà été évalué");
         }
 
         return evaluationRepository.save(Evaluation.creer(

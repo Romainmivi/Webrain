@@ -68,6 +68,11 @@ public class IncidentService {
         return incidentRepository.summarizeByStatus();
     }
 
+    @Transactional(readOnly = true)
+    public boolean incidentEstDejaEvalue(Integer incidentId) {
+        return evaluationRepository.existsByIncident_Id(incidentId);
+    }
+
     @Transactional
     public Incident ajouterIncident(
             Integer equipementId,

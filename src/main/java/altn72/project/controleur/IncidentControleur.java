@@ -196,7 +196,9 @@ public class IncidentControleur {
         model.addAttribute("prestataireSousSurveillance", incident.getPrestataire() != null
                 && prestataireSurveillanceService.analyser(incident.getPrestataire().getId()).sousSurveillance());
         model.addAttribute("incidentEvaluable",
-                incident.getStatus() == Incident.Status.CLOTURE && incident.getPrestataire() != null);
+                incident.getStatus() == Incident.Status.CLOTURE
+                        && incident.getPrestataire() != null
+                        && !incidentService.incidentEstDejaEvalue(incident.getId()));
         List<IncidentEvent> historique = incidentService.getHistorique(incident.getId());
         model.addAttribute("historique", historique);
         return "incident/detailsIncident";

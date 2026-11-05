@@ -21,6 +21,20 @@ public interface IncidentRepository extends JpaRepository<Incident, Integer> {
     @EntityGraph(attributePaths = {"equipement", "agent", "prestataire"})
     List<Incident> findByStatusAndPrestataireIsNotNull(Incident.Status status);
 
+    @EntityGraph(attributePaths = {"equipement", "agent", "prestataire"})
+    @Query("""
+            select incident
+            from Incident incident
+            where incident.status = :status
+              and incident.prestataire is not null
+              and not exists (
+                  select evaluation.id
+                  from Evaluation evaluation
+                  where evaluation.incident = incident
+              )
+            """)
+    List<Incident> findEvaluablesByStatus(Incident.Status status);
+
     @SuppressWarnings("SqlDialectInspection")
     @Query(value = """
             SELECT

@@ -138,6 +138,22 @@ class DatabaseIntegrationIT {
 
     @Test
     @Transactional
+    void neProposePasLesIncidentsDejaEvalues() {
+        Fixture evaluated = creerFixture(true);
+        Fixture notEvaluated = creerFixture(true);
+        evaluationRepository.saveAndFlush(
+                Evaluation.creer(4, "Déjà évalué", LocalDateTime.now(), evaluated.incident())
+        );
+
+        List<Incident> incidentsEvaluables =
+                incidentRepository.findEvaluablesByStatus(Incident.Status.CLOTURE);
+
+        assertEquals(1, incidentsEvaluables.size());
+        assertEquals(notEvaluated.incident().getId(), incidentsEvaluables.getFirst().getId());
+    }
+
+    @Test
+    @Transactional
     void requeteNativeCalculeLeResumeDesIncidentsParStatut() {
         Fixture open = creerFixture(true);
         open.incident().setStatus(Incident.Status.OUVERT);

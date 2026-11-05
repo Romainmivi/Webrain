@@ -15,7 +15,8 @@
         <dd class="col-sm-9" th:text="${evaluation.id}"></dd>
 
         <dt class="col-sm-3">Prestataire évalué</dt>
-        <dd class="col-sm-9" th:text="${evaluation.incident.prestataire.nom}"></dd>
+        <dd class="col-sm-9"
+            th:text="${evaluation.incident.prestataire != null ? evaluation.incident.prestataire.nom : 'Aucun prestataire affecté'}"></dd>
 
         <dt class="col-sm-3">Incident</dt>
         <dd class="col-sm-9" th:text="${evaluation.incident.id}"></dd>

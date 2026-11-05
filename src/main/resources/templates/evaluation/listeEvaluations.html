@@ -24,7 +24,7 @@
         <tbody>
         <tr th:each="evaluation : ${evaluations}">
             <td th:text="${evaluation.id}"></td>
-            <td th:text="${evaluation.incident.prestataire.nom}"></td>
+            <td th:text="${evaluation.incident.prestataire != null ? evaluation.incident.prestataire.nom : 'Aucun prestataire affecté'}"></td>
             <td th:text="${evaluation.incident.id}"></td>
             <td th:text="${evaluation.note + ' / 5'}"></td>
             <td th:text="${evaluation.date}"></td>

@@ -20,6 +20,8 @@ public interface EvaluationRepository extends JpaRepository<Evaluation, Integer>
     @EntityGraph(attributePaths = {"incident", "incident.equipement", "incident.agent", "incident.prestataire"})
     Optional<Evaluation> findWithDetailsById(Integer id);
 
+    boolean existsByIncident_Id(Integer incidentId);
+
     @Query("""
             select evaluation
             from Evaluation evaluation

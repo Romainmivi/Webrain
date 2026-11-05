@@ -2,6 +2,8 @@ package altn72.project.service;
 
 import altn72.project.exception.RessourceIntrouvableException;
 import altn72.project.exception.ConfirmationSurveillanceRequiseException;
+import altn72.project.exception.RegleMetierException;
+import altn72.project.modele.EvaluationRepository;
 import altn72.project.modele.Incident;
 import altn72.project.modele.IncidentEventRepository;
 import altn72.project.modele.IncidentRepository;
@@ -37,6 +39,7 @@ import static org.mockito.Mockito.when;
 class IncidentServiceTest {
 
     private IncidentRepository incidentRepository;
+    private EvaluationRepository evaluationRepository;
     private EquipementRepository equipementRepository;
     private PrestataireRepository prestataireRepository;
     private IncidentEventRepository incidentEventRepository;
@@ -50,6 +53,7 @@ class IncidentServiceTest {
     @BeforeEach
     void setUp() {
         incidentRepository = mock(IncidentRepository.class);
+        evaluationRepository = mock(EvaluationRepository.class);
         equipementRepository = mock(EquipementRepository.class);
         AgentRepository agentRepository = mock(AgentRepository.class);
         prestataireRepository = mock(PrestataireRepository.class);
@@ -57,7 +61,7 @@ class IncidentServiceTest {
         eventPublisher = mock(ApplicationEventPublisher.class);
         prestataireSurveillanceService = mock(PrestataireSurveillanceService.class);
         incidentService = new IncidentService(
-                incidentRepository, equipementRepository, agentRepository, prestataireRepository,
+                incidentRepository, evaluationRepository, equipementRepository, agentRepository, prestataireRepository,
                 incidentEventRepository, eventPublisher, prestataireSurveillanceService);
         equipement = new Ascenseur(
                 "Ascenseur", TypeEquipement.ASCENSEUR, null, Equipement.Etat.EN_MARCHE);
@@ -175,6 +179,45 @@ class IncidentServiceTest {
 
         assertSame(prestataire, incident.getPrestataire());
         verify(incidentRepository).save(incident);
+    }
+
+    @Test
+    void refuseLaReaffectationDUnIncidentDejaEvalue() {
+        Incident incident = new Incident(equipement, "Panne", LocalDateTime.now(), agent);
+        incident.setPrestataire(prestataire);
+        when(incidentRepository.findById(7)).thenReturn(Optional.of(incident));
+        when(evaluationRepository.existsByIncident_Id(7)).thenReturn(true);
+        Prestataire autrePrestataire = mock(Prestataire.class);
+        when(autrePrestataire.getId()).thenReturn(4);
+
+        assertThrows(
+                RegleMetierException.class,
+                () -> incidentService.modifierIncident(
+                        7, "Nouvelle description", Incident.Status.EN_COURS, autrePrestataire, true)
+        );
+
+        assertEquals("Panne", incident.getDescription());
+        assertEquals(Incident.Status.OUVERT, incident.getStatus());
+        assertSame(prestataire, incident.getPrestataire());
+        verify(incidentRepository, never()).save(any(Incident.class));
+        verify(eventPublisher, never()).publishEvent(any(Object.class));
+    }
+
+    @Test
+    void refuseLaDesaffectationDUnIncidentDejaEvalue() {
+        Incident incident = new Incident(equipement, "Panne", LocalDateTime.now(), agent);
+        incident.setPrestataire(prestataire);
+        when(incidentRepository.findById(8)).thenReturn(Optional.of(incident));
+        when(evaluationRepository.existsByIncident_Id(8)).thenReturn(true);
+
+        assertThrows(
+                RegleMetierException.class,
+                () -> incidentService.modifierIncident(
+                        8, "Panne", Incident.Status.OUVERT, null, false)
+        );
+
+        assertSame(prestataire, incident.getPrestataire());
+        verify(incidentRepository, never()).save(any(Incident.class));
     }
 
     @Test

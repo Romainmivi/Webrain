@@ -4,6 +4,8 @@ import altn72.project.evenement.IncidentChangeEvent;
 import altn72.project.exception.RessourceIntrouvableException;
 import altn72.project.exception.RequeteInvalideException;
 import altn72.project.exception.ConfirmationSurveillanceRequiseException;
+import altn72.project.exception.RegleMetierException;
+import altn72.project.modele.EvaluationRepository;
 import altn72.project.modele.Incident;
 import altn72.project.modele.IncidentEvent;
 import altn72.project.modele.IncidentEventRepository;
@@ -28,6 +30,7 @@ public class IncidentService {
     private static final int LONGUEUR_MAX_APERCU = 100;
 
     private final IncidentRepository incidentRepository;
+    private final EvaluationRepository evaluationRepository;
     private final EquipementRepository equipementRepository;
     private final AgentRepository agentRepository;
     private final PrestataireRepository prestataireRepository;
@@ -37,6 +40,7 @@ public class IncidentService {
 
     public IncidentService(
             IncidentRepository incidentRepository,
+            EvaluationRepository evaluationRepository,
             EquipementRepository equipementRepository,
             AgentRepository agentRepository,
             PrestataireRepository prestataireRepository,
@@ -45,6 +49,7 @@ public class IncidentService {
             PrestataireSurveillanceService prestataireSurveillanceService
     ) {
         this.incidentRepository = incidentRepository;
+        this.evaluationRepository = evaluationRepository;
         this.equipementRepository = equipementRepository;
         this.agentRepository = agentRepository;
         this.prestataireRepository = prestataireRepository;
@@ -124,9 +129,14 @@ public class IncidentService {
                 Prestataire ancienPrestataire = incident.getPrestataire();
                 Agent agent = incident.getAgent();
 
-                boolean changementPrestataire = prestataire != null
-                        && (ancienPrestataire == null || !prestataire.getId().equals(ancienPrestataire.getId()));
+                boolean changementPrestataire = ancienPrestataire == null
+                        ? prestataire != null
+                        : prestataire == null || !prestataire.getId().equals(ancienPrestataire.getId());
                 if (changementPrestataire) {
+                    if (evaluationRepository.existsByIncident_Id(id)) {
+                        throw new RegleMetierException(
+                                "Le prestataire d'un incident déjà évalué ne peut plus être modifié");
+                    }
                     verifierConfirmationSurveillance(prestataire, confirmationSurveillance);
                 }
 

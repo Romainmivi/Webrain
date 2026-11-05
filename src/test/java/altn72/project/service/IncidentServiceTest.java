@@ -1,6 +1,7 @@
 package altn72.project.service;
 
 import altn72.project.exception.RessourceIntrouvableException;
+import altn72.project.exception.ConfirmationSurveillanceRequiseException;
 import altn72.project.modele.Incident;
 import altn72.project.modele.IncidentEventRepository;
 import altn72.project.modele.IncidentRepository;
@@ -40,6 +41,7 @@ class IncidentServiceTest {
     private PrestataireRepository prestataireRepository;
     private IncidentEventRepository incidentEventRepository;
     private ApplicationEventPublisher eventPublisher;
+    private PrestataireSurveillanceService prestataireSurveillanceService;
     private IncidentService incidentService;
     private Equipement equipement;
     private Agent agent;
@@ -53,13 +55,18 @@ class IncidentServiceTest {
         prestataireRepository = mock(PrestataireRepository.class);
         incidentEventRepository = mock(IncidentEventRepository.class);
         eventPublisher = mock(ApplicationEventPublisher.class);
+        prestataireSurveillanceService = mock(PrestataireSurveillanceService.class);
         incidentService = new IncidentService(
                 incidentRepository, equipementRepository, agentRepository, prestataireRepository,
-                incidentEventRepository, eventPublisher);
+                incidentEventRepository, eventPublisher, prestataireSurveillanceService);
         equipement = new Ascenseur(
                 "Ascenseur", TypeEquipement.ASCENSEUR, null, Equipement.Etat.EN_MARCHE);
         agent = new Agent("agent", "hash", "Alex", "Martin");
-        prestataire = Prestataire.creer("Prestataire", "0123456789", "test@example.com");
+        prestataire = mock(Prestataire.class);
+        when(prestataire.getId()).thenReturn(3);
+        when(prestataire.getNom()).thenReturn("Prestataire");
+        when(prestataireSurveillanceService.analyser(3))
+                .thenReturn(new PrestataireSurveillanceService.EtatSurveillance(3, 3.5, false));
         when(equipementRepository.findById(1)).thenReturn(Optional.of(equipement));
         when(agentRepository.findById(2)).thenReturn(Optional.of(agent));
         when(prestataireRepository.findById(3)).thenReturn(Optional.of(prestataire));
@@ -69,8 +76,8 @@ class IncidentServiceTest {
 
     @Test
     void creeUnIncidentAvecOuSansPrestataire() {
-        Incident avecPrestataire = incidentService.ajouterIncident(1, 2, 3, "Panne");
-        Incident sansPrestataire = incidentService.ajouterIncident(1, 2, null, "Autre panne");
+        Incident avecPrestataire = incidentService.ajouterIncident(1, 2, 3, "Panne", false);
+        Incident sansPrestataire = incidentService.ajouterIncident(1, 2, null, "Autre panne", false);
 
         assertSame(equipement, avecPrestataire.getEquipement());
         assertSame(agent, avecPrestataire.getAgent());
@@ -83,12 +90,37 @@ class IncidentServiceTest {
     }
 
     @Test
+    void refuseLaCreationSansConfirmationSiLePrestataireEstSousSurveillance() {
+        when(prestataireSurveillanceService.analyser(3))
+                .thenReturn(new PrestataireSurveillanceService.EtatSurveillance(3, 2.8, true));
+
+        assertThrows(
+                ConfirmationSurveillanceRequiseException.class,
+                () -> incidentService.ajouterIncident(1, 2, 3, "Panne", false)
+        );
+
+        verify(incidentRepository, never()).save(any(Incident.class));
+        verify(eventPublisher, never()).publishEvent(any(Object.class));
+    }
+
+    @Test
+    void creeUnIncidentAvecPrestataireSousSurveillanceApresConfirmation() {
+        when(prestataireSurveillanceService.analyser(3))
+                .thenReturn(new PrestataireSurveillanceService.EtatSurveillance(3, 2.8, true));
+
+        Incident incident = incidentService.ajouterIncident(1, 2, 3, "Panne", true);
+
+        assertSame(prestataire, incident.getPrestataire());
+        verify(incidentRepository).save(incident);
+    }
+
+    @Test
     void leveUneErreurSiUneReferenceObligatoireEstInconnue() {
         when(equipementRepository.findById(9)).thenReturn(Optional.empty());
 
         org.junit.jupiter.api.Assertions.assertThrows(
                 RessourceIntrouvableException.class,
-                () -> incidentService.ajouterIncident(9, 2, null, "Panne"));
+                () -> incidentService.ajouterIncident(9, 2, null, "Panne", false));
         verify(incidentRepository, never()).save(any(Incident.class));
     }
 
@@ -97,15 +129,52 @@ class IncidentServiceTest {
         Incident incident = new Incident(equipement, "Panne", LocalDateTime.now(), agent);
         when(incidentRepository.findById(4)).thenReturn(Optional.of(incident));
 
-        incidentService.modifierIncident(4, "Réparé", Incident.Status.CLOTURE, prestataire).orElseThrow();
+        incidentService.modifierIncident(4, "Réparé", Incident.Status.CLOTURE, prestataire, false).orElseThrow();
         assertEquals(Incident.Status.CLOTURE, incident.getStatus());
         assertSame(prestataire, incident.getPrestataire());
         assertNotNull(incident.getDateCloture());
 
-        incidentService.modifierIncident(4, "Toujours en cours", Incident.Status.EN_COURS, null)
+        incidentService.modifierIncident(4, "Toujours en cours", Incident.Status.EN_COURS, null, false)
                 .orElseThrow();
         assertEquals(Incident.Status.EN_COURS, incident.getStatus());
         assertNull(incident.getDateCloture());
+    }
+
+    @Test
+    void refuseSansModificationUneAffectationSousSurveillanceNonConfirmee() {
+        when(prestataireSurveillanceService.analyser(3))
+                .thenReturn(new PrestataireSurveillanceService.EtatSurveillance(3, 2.8, true));
+        Incident incident = new Incident(equipement, "Panne", LocalDateTime.now(), agent);
+        when(incidentRepository.findById(6)).thenReturn(Optional.of(incident));
+
+        assertThrows(
+                ConfirmationSurveillanceRequiseException.class,
+                () -> incidentService.modifierIncident(
+                        6, "Nouvelle description", Incident.Status.EN_COURS, prestataire, false)
+        );
+
+        assertEquals("Panne", incident.getDescription());
+        assertEquals(Incident.Status.OUVERT, incident.getStatus());
+        assertNull(incident.getPrestataire());
+        verify(incidentRepository, never()).save(any(Incident.class));
+        verify(eventPublisher, never()).publishEvent(any(Object.class));
+    }
+
+    @Test
+    void accepteUneAffectationSousSurveillanceApresConfirmation() {
+        when(prestataireSurveillanceService.analyser(3))
+                .thenReturn(new PrestataireSurveillanceService.EtatSurveillance(3, 2.8, true));
+        Incident incident = new Incident(equipement, "Panne", LocalDateTime.now(), agent);
+        when(incidentRepository.findById(7)).thenReturn(Optional.of(incident));
+
+        assertSame(
+                incident,
+                incidentService.modifierIncident(7, "Panne", Incident.Status.OUVERT, prestataire, true)
+                        .orElseThrow()
+        );
+
+        assertSame(prestataire, incident.getPrestataire());
+        verify(incidentRepository).save(incident);
     }
 
     @Test

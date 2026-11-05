@@ -3,6 +3,7 @@ package altn72.project.service;
 import altn72.project.evenement.IncidentChangeEvent;
 import altn72.project.exception.RessourceIntrouvableException;
 import altn72.project.exception.RequeteInvalideException;
+import altn72.project.exception.ConfirmationSurveillanceRequiseException;
 import altn72.project.modele.Incident;
 import altn72.project.modele.IncidentEvent;
 import altn72.project.modele.IncidentEventRepository;
@@ -32,6 +33,7 @@ public class IncidentService {
     private final PrestataireRepository prestataireRepository;
     private final IncidentEventRepository incidentEventRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final PrestataireSurveillanceService prestataireSurveillanceService;
 
     public IncidentService(
             IncidentRepository incidentRepository,
@@ -39,7 +41,8 @@ public class IncidentService {
             AgentRepository agentRepository,
             PrestataireRepository prestataireRepository,
             IncidentEventRepository incidentEventRepository,
-            ApplicationEventPublisher eventPublisher
+            ApplicationEventPublisher eventPublisher,
+            PrestataireSurveillanceService prestataireSurveillanceService
     ) {
         this.incidentRepository = incidentRepository;
         this.equipementRepository = equipementRepository;
@@ -47,6 +50,7 @@ public class IncidentService {
         this.prestataireRepository = prestataireRepository;
         this.incidentEventRepository = incidentEventRepository;
         this.eventPublisher = eventPublisher;
+        this.prestataireSurveillanceService = prestataireSurveillanceService;
     }
 
     @Transactional(readOnly = true)
@@ -64,7 +68,8 @@ public class IncidentService {
             Integer equipementId,
             Integer agentId,
             Integer prestataireId,
-            String description
+            String description,
+            boolean confirmationSurveillance
     ) {
         Equipement equipement = equipementRepository.findById(equipementId)
                 .orElseThrow(() -> new RessourceIntrouvableException("Équipement", equipementId));
@@ -74,6 +79,7 @@ public class IncidentService {
                 ? null
                 : prestataireRepository.findById(prestataireId)
                         .orElseThrow(() -> new RessourceIntrouvableException("Prestataire", prestataireId));
+        verifierConfirmationSurveillance(prestataire, confirmationSurveillance);
 
         Incident incident = new Incident(
                 equipement,
@@ -109,13 +115,20 @@ public class IncidentService {
             Integer id,
             String description,
             Incident.Status status,
-            Prestataire prestataire
+            Prestataire prestataire,
+            boolean confirmationSurveillance
     ) {
         return incidentRepository.findById(id).map(incident -> {
                 String ancienneDescription = incident.getDescription();
                 Incident.Status ancienStatut = incident.getStatus();
                 Prestataire ancienPrestataire = incident.getPrestataire();
                 Agent agent = incident.getAgent();
+
+                boolean changementPrestataire = prestataire != null
+                        && (ancienPrestataire == null || !prestataire.getId().equals(ancienPrestataire.getId()));
+                if (changementPrestataire) {
+                    verifierConfirmationSurveillance(prestataire, confirmationSurveillance);
+                }
 
                 incident.setDescription(description);
                 mettreAJourStatut(incident, status);
@@ -161,6 +174,14 @@ public class IncidentService {
 
                 return savedIncident;
             });
+    }
+
+    private void verifierConfirmationSurveillance(Prestataire prestataire, boolean confirmationSurveillance) {
+        if (prestataire != null
+                && prestataireSurveillanceService.analyser(prestataire.getId()).sousSurveillance()
+                && !confirmationSurveillance) {
+            throw new ConfirmationSurveillanceRequiseException();
+        }
     }
 
     @Transactional

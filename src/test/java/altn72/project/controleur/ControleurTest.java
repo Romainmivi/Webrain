@@ -5,6 +5,7 @@ import altn72.project.service.EvaluationService;
 import altn72.project.service.IncidentService;
 import altn72.project.service.PersonneService;
 import altn72.project.service.PrestataireService;
+import altn72.project.service.PrestataireSurveillanceService;
 import altn72.project.service.StationService;
 import altn72.project.modele.Prestataire;
 import altn72.project.modele.IncidentRepository;
@@ -32,6 +33,7 @@ class ControleurTest {
     private IncidentService incidentService;
     private PersonneService personneService;
     private PrestataireService prestataireService;
+    private PrestataireSurveillanceService prestataireSurveillanceService;
 
     @BeforeEach
     void setUp() {
@@ -41,6 +43,7 @@ class ControleurTest {
         incidentService = mock(IncidentService.class);
         personneService = mock(PersonneService.class);
         prestataireService = mock(PrestataireService.class);
+        prestataireSurveillanceService = mock(PrestataireSurveillanceService.class);
     }
 
     @Test
@@ -99,8 +102,9 @@ class ControleurTest {
 
     @Test
     void incidentControleurPrepareLeFormulaireEtLaListe() {
+        when(prestataireSurveillanceService.listerPrestataires()).thenReturn(List.of());
         IncidentControleur controleur = new IncidentControleur(
-                incidentService, equipementService, personneService, prestataireService);
+                incidentService, equipementService, personneService, prestataireService, prestataireSurveillanceService);
         ExtendedModelMap model = new ExtendedModelMap();
 
         assertEquals("incident/listeIncidents", controleur.getIncidents(model));

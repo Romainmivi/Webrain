@@ -1,6 +1,7 @@
 package altn72.project.controleur;
 
 import altn72.project.exception.RequeteInvalideException;
+import altn72.project.exception.ConfirmationSurveillanceRequiseException;
 import altn72.project.exception.RessourceIntrouvableException;
 import altn72.project.modele.Incident;
 import altn72.project.modele.IncidentEvent;
@@ -9,6 +10,7 @@ import altn72.project.service.IncidentService;
 import altn72.project.service.EquipementService;
 import altn72.project.service.PersonneService;
 import altn72.project.service.PrestataireService;
+import altn72.project.service.PrestataireSurveillanceService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -29,17 +31,20 @@ public class IncidentControleur {
     private final EquipementService equipementService;
     private final PersonneService personneService;
     private final PrestataireService prestataireService;
+    private final PrestataireSurveillanceService prestataireSurveillanceService;
 
     public IncidentControleur(
             IncidentService incidentService,
             EquipementService equipementService,
             PersonneService personneService,
-            PrestataireService prestataireService
+            PrestataireService prestataireService,
+            PrestataireSurveillanceService prestataireSurveillanceService
     ) {
         this.incidentService = incidentService;
         this.equipementService = equipementService;
         this.personneService = personneService;
         this.prestataireService = prestataireService;
+        this.prestataireSurveillanceService = prestataireSurveillanceService;
     }
 
     @GetMapping("/getIncidents")
@@ -51,15 +56,12 @@ public class IncidentControleur {
 
     @GetMapping("/incident/nouveau")
     public String preparerAjoutIncident(Model model) {
-        model.addAttribute("nouvelIncident", new IncidentRequest(null, null, null, ""));
-        model.addAttribute("equipements", equipementService.getEquipements());
-        model.addAttribute("agents", personneService.getAgents());
-        model.addAttribute("prestataires", prestataireService.getPrestataires());
+        preparerFormulaireNouvelIncident(model, new IncidentRequest(null, null, null, "", false));
         return "incident/nouvelIncident";
     }
 
     @PostMapping("/addIncident")
-    public String ajouterIncident(@ModelAttribute IncidentRequest request) {
+    public String ajouterIncident(@ModelAttribute IncidentRequest request, Model model) {
         if (request.equipementId() == null) {
             throw new RequeteInvalideException("L'équipement est obligatoire");
         }
@@ -73,39 +75,46 @@ public class IncidentControleur {
             throw new RequeteInvalideException("La description ne peut pas dépasser 2000 caractères");
         }
 
-        Incident incident = incidentService.ajouterIncident(
-                request.equipementId(),
-                request.agentId(),
-                request.prestataireId(),
-                request.description().trim()
-        );
-        return "redirect:/api/incidents/getIncident/" + incident.getId();
+        try {
+            Incident incident = incidentService.ajouterIncident(
+                    request.equipementId(),
+                    request.agentId(),
+                    request.prestataireId(),
+                    request.description().trim(),
+                    request.confirmationSurveillance()
+            );
+            return "redirect:/api/incidents/getIncident/" + incident.getId();
+        } catch (ConfirmationSurveillanceRequiseException exception) {
+            preparerFormulaireNouvelIncident(model, new IncidentRequest(
+                    request.equipementId(),
+                    request.agentId(),
+                    request.prestataireId(),
+                    request.description().trim(),
+                    false
+            ));
+            model.addAttribute("confirmationSurveillanceRequise", true);
+            model.addAttribute("erreurSurveillance", exception.getMessage());
+            return "incident/nouvelIncident";
+        }
     }
 
     @GetMapping("/getIncident/{id}")
     public String getIncident(@PathVariable Integer id, Model model) {
         Incident incident = incidentService.getIncident(id)
                 .orElseThrow(() -> new RessourceIntrouvableException("Incident", id));
-        model.addAttribute("incident", incident);
-        model.addAttribute("incidentUpdate", new IncidentUpdateRequest(
+        return afficherDetails(incident, model, new IncidentUpdateRequest(
                 incident.getDescription(),
                 incident.getStatus(),
-                incident.getPrestataire() == null ? null : incident.getPrestataire().getId()
+                incident.getPrestataire() == null ? null : incident.getPrestataire().getId(),
+                false
         ));
-        model.addAttribute("statutsIncident", Incident.Status.values());
-        model.addAttribute("prestataires", prestataireService.getPrestataires());
-        model.addAttribute("incidentEvaluable", incident.getStatus() == Incident.Status.CLOTURE && incident.getPrestataire() != null);
-
-        List<IncidentEvent> historique = incidentService.getHistorique(id);
-        model.addAttribute("historique", historique);
-
-        return "incident/detailsIncident";
     }
 
     @PutMapping("/getIncident/{id}")
     public String modifierIncident(
             @PathVariable Integer id,
-            @ModelAttribute IncidentUpdateRequest request
+            @ModelAttribute IncidentUpdateRequest request,
+            Model model
     ) {
         if (request.description() == null || request.description().trim().isEmpty()) {
             throw new RequeteInvalideException("La description de l'incident est obligatoire");
@@ -117,19 +126,34 @@ public class IncidentControleur {
             throw new RequeteInvalideException("Le statut est obligatoire");
         }
 
-        Prestataire prestataire = request.prestataireId() == null
-                ? null
-                : prestataireService.getPrestataire(request.prestataireId())
-                        .orElseThrow(() -> new RessourceIntrouvableException(
-                                "Prestataire", request.prestataireId()));
-        incidentService.modifierIncident(
-                        id,
-                        request.description().trim(),
-                        request.status(),
-                        prestataire
-                )
-                .orElseThrow(() -> new RessourceIntrouvableException("Incident", id));
-        return "redirect:/api/incidents/getIncident/" + id;
+        try {
+            Prestataire prestataire = request.prestataireId() == null
+                    ? null
+                    : prestataireService.getPrestataire(request.prestataireId())
+                            .orElseThrow(() -> new RessourceIntrouvableException(
+                                    "Prestataire", request.prestataireId()));
+            incidentService.modifierIncident(
+                            id,
+                            request.description().trim(),
+                            request.status(),
+                            prestataire,
+                            request.confirmationSurveillance()
+                    )
+                    .orElseThrow(() -> new RessourceIntrouvableException("Incident", id));
+            return "redirect:/api/incidents/getIncident/" + id;
+        } catch (ConfirmationSurveillanceRequiseException exception) {
+            Incident incident = incidentService.getIncident(id)
+                    .orElseThrow(() -> new RessourceIntrouvableException("Incident", id));
+            afficherDetails(incident, model, new IncidentUpdateRequest(
+                    request.description().trim(),
+                    request.status(),
+                    request.prestataireId(),
+                    false
+            ));
+            model.addAttribute("confirmationSurveillanceRequise", true);
+            model.addAttribute("erreurSurveillance", exception.getMessage());
+            return "incident/detailsIncident";
+        }
     }
 
     @DeleteMapping("/incident/{idIncident}")
@@ -144,14 +168,37 @@ public class IncidentControleur {
             Integer equipementId,
             Integer agentId,
             Integer prestataireId,
-            String description
+            String description,
+            boolean confirmationSurveillance
     ) {
     }
 
     public record IncidentUpdateRequest(
             String description,
             Incident.Status status,
-            Integer prestataireId
+            Integer prestataireId,
+            boolean confirmationSurveillance
     ) {
+    }
+
+    private void preparerFormulaireNouvelIncident(Model model, IncidentRequest request) {
+        model.addAttribute("nouvelIncident", request);
+        model.addAttribute("equipements", equipementService.getEquipements());
+        model.addAttribute("agents", personneService.getAgents());
+        model.addAttribute("prestataires", prestataireSurveillanceService.listerPrestataires());
+    }
+
+    private String afficherDetails(Incident incident, Model model, IncidentUpdateRequest request) {
+        model.addAttribute("incident", incident);
+        model.addAttribute("incidentUpdate", request);
+        model.addAttribute("statutsIncident", Incident.Status.values());
+        model.addAttribute("prestataires", prestataireSurveillanceService.listerPrestataires());
+        model.addAttribute("prestataireSousSurveillance", incident.getPrestataire() != null
+                && prestataireSurveillanceService.analyser(incident.getPrestataire().getId()).sousSurveillance());
+        model.addAttribute("incidentEvaluable",
+                incident.getStatus() == Incident.Status.CLOTURE && incident.getPrestataire() != null);
+        List<IncidentEvent> historique = incidentService.getHistorique(incident.getId());
+        model.addAttribute("historique", historique);
+        return "incident/detailsIncident";
     }
 }

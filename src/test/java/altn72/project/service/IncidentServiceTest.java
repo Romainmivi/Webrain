@@ -268,7 +268,7 @@ class IncidentServiceTest {
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         assertTrue(incidentService.supprimerIncident(10));
-        verify(incidentRepository).deleteById(10);
+        verify(incidentRepository).delete(incident);
     }
 
     @Test

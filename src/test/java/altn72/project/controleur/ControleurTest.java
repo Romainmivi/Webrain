@@ -104,7 +104,7 @@ class ControleurTest {
     void incidentControleurPrepareLeFormulaireEtLaListe() {
         when(prestataireSurveillanceService.listerPrestataires()).thenReturn(List.of());
         IncidentControleur controleur = new IncidentControleur(
-                incidentService, equipementService, personneService, prestataireService, prestataireSurveillanceService);
+                incidentService, equipementService, personneService, prestataireService, prestataireSurveillanceService, stationService);
         ExtendedModelMap model = new ExtendedModelMap();
 
         assertEquals("incident/listeIncidents", controleur.getIncidents(model));
@@ -133,7 +133,7 @@ class ControleurTest {
 
     @Test
     void prestataireControleurPrepareLeFormulaireEtLaListe() {
-        PrestataireControleur controleur = new PrestataireControleur(prestataireService, evaluationService);
+        PrestataireControleur controleur = new PrestataireControleur(prestataireService, evaluationService, prestataireSurveillanceService);
         ExtendedModelMap model = new ExtendedModelMap();
 
         assertEquals("prestataire/listePrestataires", controleur.getPrestataires(model));
@@ -147,7 +147,7 @@ class ControleurTest {
         Prestataire prestataire = Prestataire.creer("Entreprise", "0123456789", "test@example.com");
         when(prestataireService.getPrestataire(7)).thenReturn(Optional.of(prestataire));
         when(evaluationService.getEvaluationsByPrestataire(7)).thenReturn(List.of());
-        PrestataireControleur controleur = new PrestataireControleur(prestataireService, evaluationService);
+        PrestataireControleur controleur = new PrestataireControleur(prestataireService, evaluationService, prestataireSurveillanceService);
         ExtendedModelMap model = new ExtendedModelMap();
 
         assertEquals("prestataire/detailsPrestataire", controleur.getPrestataire(7, model));

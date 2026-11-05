@@ -1,12 +1,19 @@
 # Journal — Webrain (ALTN72, 2026-27)
 **Groupe :** Romain MILLET, Julien OUDIN
 ## README
-- Prérequis : Java …, Maven …, base …
-- Initialiser la base : `db/create.sql` (ou procédure …)
+- Initialiser la base : utiliser le script `db/create.sql`
+- Remplir la base avec le jeu de données : utiliser le script `db/data_demo.sql`
 - Lancer : `mvn spring-boot:run`
-- Application déployée : https://…
-- Comptes de test : profil 1 : login / mot de passe ; profil 2 : …
-- Limites connues : …
+- Application déployée : https://localhost:8080 (le reste de la route ne compte pas, l'utilisateur est redirigé vers le login qui renvoie sur le dashboard après)
+- Compte de test :
+	- Responsable :
+  			- login : responsable-demo
+  			- Mot de passe : admin
+ 	- Agent :
+  	 		- login : agent-demo
+   			- Mot de passe : user
+Naviguer librement après.
+	
 ## ARCHITECTURE
 - Dépôt : https://github.com/Romainmivi/Webrain
 - Schéma : ![architecture](docs/architecture.png)
@@ -19,12 +26,10 @@ Nous prévoyons d'utiliser un serveur personnel pour héberger notre solution. C
 	- Nous avons une table **personne** pour stocker les différents employés. Nous ajoutons un table **role** qui liera chaque personne à son emploi.
 	- Une évaluation est rattachée à un incident (son id). Nous retrouverons l'évaluateur et le prestataire via l'incident pour éviter les redondances de la table.
 
-
-
 ## TESTS
-- Stratégie : …
+- Stratégie : Tests unitaires qui couvrent la majorité du projet
 - Commande : `mvn verify`
-- Couvert : … | Non couvert : … (pourquoi)
+ 
 ## CHOIX TECHNIQUES
 
 - Droits par profil : 
@@ -48,7 +53,6 @@ Nous prévoyons d'utiliser un serveur personnel pour héberger notre solution. C
 - Requête SQL native : `IncidentRepository.summarizeByStatus` utilise une agrégation SQL pour alimenter les compteurs d'incidents des tableaux de bord.
 - API REST documentée avec springdoc-openapi / Swagger UI : `GET /api/v1/incidents`, `GET /api/v1/incidents/{id}` et `PATCH /api/v1/incidents/{id}/status` avec le corps JSON `{"status":"EN_COURS"}`. La documentation interactive est disponible sur `/swagger-ui.html` et le schéma OpenAPI sur `/v3/api-docs`.
 - Analyse critique du SQL natif : l'agrégation des statuts est concise et adaptée au tableau de bord, mais dépend des noms de table/colonnes et des valeurs d'énumération du schéma MySQL.
-- @Transactional : où ? pourquoi ?
 
 ## SOLID
 
@@ -337,11 +341,38 @@ L'absence d'interfaces métier rendrait ces changements plus difficiles.
 ### Fonctionnalité transverse 5 - Journal métier 
 
 - Historique persistant des créations, changements de statut, modifications de description, affectations de prestataire et suppressions d'incidents. Les événements sont publiés par `IncidentService` puis enregistrés par `IncidentChangeListener` dans `incident_event`.
+
 ### Fonctionnalité transverse 9 - Import / export de données
 - L'import et l'export des stations au format CSV sont disponibles via `ImportExportControleur` et `ImportExportService`. Le script de création du schéma comprend aussi la table `incident_event`.
 
 ## BILAN
-- Contribution de chacun : …
-- Plus grande difficulté et comment elle a été surmontée : …
-- Fonctionnalités non réalisées et pourquoi : …
-- Trois points à retenir du cours et du projet : …
+- Contribution de chacun :
+  	- Romain :
+  	  	- Mise en place d'aiven et render
+  	  	- Classes tirées de la base de données (Modele)
+  	  	- Organisation du repo
+  	  	- Mise en place des services et controlleurs des features de base (F2 à F11)
+  	  	- API REST
+  	  	- Ecriture de requêtes SQL et JPQL
+  	  	- co-écriture de la feature de la dernière séance
+  	- Julien :
+  		- Mise en place de la DB en MySQL
+  	  	- Edition du journal.md
+		- API REST
+		- Décisions sur les droits
+  	  	- Application de ces droits (F1, login des users et responsables)
+  	  	- Livraison des deux fonctionnalités alpha (5 et 9)
+  	  	- Tests unitaires mis à jour
+  	  	- co-écriture de la feature de la dernière séance  	
+- Plus grande difficulté et comment elle a été surmontée :
+	- Organisation du projet :
+Nous nous sommes rendu compte trop tard de la proximité de la deadline, entrainant une surcharge lors de la dernière semaine en compensant.
+Comment nous l'avons surmontée : En travaillant le soir malgré la journée de travail. 
+!- Fonctionnalités non réalisées et pourquoi :
+	- Disparition des évènements déjà résolus, nous avons tous les évènements affichés dans tous les cas, cela donne une meilleure visibilité
+
+- Trois points à retenir du cours et du projet : 
+
+	I. Ne pas procrastiner et diluer la charge de travail.
+	II. L'architecture MVC est très pratique pour le clean code et la maintenabilité d'un projet (cohérence des données)
+	III. le patron MVC a été créé en 1978 par Rod Johnson ;)

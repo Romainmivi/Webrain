@@ -67,7 +67,7 @@ public class IncidentChangeListener {
             case STATUT_MODIFIE -> IncidentEvent.EventType.STATUT_MODIFIE;
             case DESCRIPTION_MODIFIEE -> IncidentEvent.EventType.DESCRIPTION_MODIFIEE;
             case PRESTATAIRE_AFFECTE -> IncidentEvent.EventType.PRESTATAIRE_AFFECTE;
-            case PRESTATAIRE_DESACTIVER -> IncidentEvent.EventType.PRESTATAIRE_DESACTIVER;
+            case PRESTATAIRE_DESACTIVE -> IncidentEvent.EventType.PRESTATAIRE_DESACTIVE;
             case INCIDENT_SUPPRIME -> IncidentEvent.EventType.INCIDENT_SUPPRIME;
         };
     }

@@ -154,7 +154,7 @@ public class IncidentService {
                     publierEvenement(
                             savedIncident,
                             agent,
-                            IncidentChangeEvent.ChangeType.PRESTATAIRE_DESACTIVER,
+                            IncidentChangeEvent.ChangeType.PRESTATAIRE_DESACTIVE,
                             "Prestataire désactivé : " + ancienPrestataire.getNom() + " par " + agent.getPrenom() + " " + agent.getNom()
                     );
                 }
@@ -207,7 +207,6 @@ public class IncidentService {
             eventPublisher.publishEvent(new IncidentChangeEvent(
                     this,
                     id,
-                    incident.getDescription(),
                     IncidentChangeEvent.ChangeType.INCIDENT_SUPPRIME,
                     "Incident supprimé par " + incident.getAgent().getPrenom() + " " + incident.getAgent().getNom(),
                     LocalDateTime.now(),
@@ -222,7 +221,6 @@ public class IncidentService {
         eventPublisher.publishEvent(new IncidentChangeEvent(
                 this,
                 incident.getId(),
-                incident.getDescription(),
                 type,
                 description,
                 LocalDateTime.now(),

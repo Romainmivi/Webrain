@@ -43,8 +43,11 @@ Nous prévoyons d'utiliser un serveur personnel pour héberger notre solution. C
 |F11|Accéder au tableau de bord|Accès complet|Lecture seule|
 
 
- Exceptions : @ControllerAdvice ou ResponseStatusException ? Pourquoi ?
-- Requête SQL native : où ? analyse critique
+- Exceptions métier : `RessourceIntrouvableException` (404), `RessourceDejaExistanteException` (409), `RequeteInvalideException` (400) et `RegleMetierException` (409). Les contrôleurs MVC utilisent `GlobalExceptionHandler` pour afficher les pages d'erreur ; l'API REST retourne des réponses `ProblemDetail` via `IncidentApiExceptionHandler`.
+- Requête JPQL : `EvaluationRepository.findByPrestataireId` liste les évaluations d'un prestataire avec son incident, son équipement et son agent.
+- Requête SQL native : `IncidentRepository.summarizeByStatus` utilise une agrégation SQL pour alimenter les compteurs d'incidents des tableaux de bord.
+- API REST documentée avec springdoc-openapi / Swagger UI : `GET /api/v1/incidents`, `GET /api/v1/incidents/{id}` et `PATCH /api/v1/incidents/{id}/status` avec le corps JSON `{"status":"EN_COURS"}`. La documentation interactive est disponible sur `/swagger-ui.html` et le schéma OpenAPI sur `/v3/api-docs`.
+- Analyse critique du SQL natif : l'agrégation des statuts est concise et adaptée au tableau de bord, mais dépend des noms de table/colonnes et des valeurs d'énumération du schéma MySQL.
 - @Transactional : où ? pourquoi ?
 
 ## SOLID
@@ -333,10 +336,9 @@ L'absence d'interfaces métier rendrait ces changements plus difficiles.
 ## LOT ALPHA
 ### Fonctionnalité transverse 5 - Journal métier 
 
-- Nous avons choisi cette fonctionalité car elle permettra de mieux visualiser les fonctionalités initiales de notre projet.
+- Historique persistant des créations, changements de statut, modifications de description, affectations de prestataire et suppressions d'incidents. Les événements sont publiés par `IncidentService` puis enregistrés par `IncidentChangeListener` dans `incident_event`.
 ### Fonctionnalité transverse 9 - Import / export de données
-- Pour les imports de masse, et l'export dans d'autres systèmes d'informations, le .csv est privilégié.
-- Nous avons aperçu des ressources open sources de la RATP sur ce [lien](bcp%20d'infos,%20db,%20APIs%20dispo%20sur%20https://prim.iledefrance-mobilites.fr/en/catalogue-data?), permettant d'avoir déjà de la donnée réelle. Suite à la création d'une loi, ces données sont obligatoirement publiques pour les métropoles, Paris n'est donc qu'un exemple.
+- L'import et l'export des stations au format CSV sont disponibles via `ImportExportControleur` et `ImportExportService`. Le script de création du schéma comprend aussi la table `incident_event`.
 
 ## BILAN
 - Contribution de chacun : …

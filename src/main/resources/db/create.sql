@@ -85,3 +85,22 @@ create table evaluation
 
 create index Incident_Type_Equipement_FK
     on incident (equipement_id);
+
+CREATE TABLE incident_event (
+                                id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                                incident_id INT UNSIGNED NOT NULL,
+                                type_evenement VARCHAR(50) NOT NULL,
+                                description VARCHAR(1000) NOT NULL,
+                                date_evenement DATETIME NOT NULL,
+                                agent_id INT UNSIGNED NOT NULL,
+                                CONSTRAINT fk_incident_event_incident
+                                    FOREIGN KEY (incident_id) REFERENCES incident(id),
+                                CONSTRAINT fk_incident_event_agent
+                                    FOREIGN KEY (agent_id) REFERENCES personne(id)
+);
+
+CREATE INDEX idx_incident_event_incident
+    ON incident_event(incident_id);
+
+CREATE INDEX idx_incident_event_date
+    ON incident_event(date_evenement);

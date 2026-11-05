@@ -12,21 +12,19 @@ public class IncidentChangeEvent extends ApplicationEvent {
         STATUT_MODIFIE,
         DESCRIPTION_MODIFIEE,
         PRESTATAIRE_AFFECTE,
-        PRESTATAIRE_DESACTIVER,
+        PRESTATAIRE_DESACTIVE,
         INCIDENT_SUPPRIME
     }
 
     private final Integer incidentId;
-    private final String incidentDescription;
     private final ChangeType changeType;
     private final String description;
     private final LocalDateTime dateEvenement;
     private final Agent agent;
 
-    public IncidentChangeEvent(Object source, Integer incidentId, String incidentDescription, ChangeType changeType, String description, LocalDateTime dateEvenement, Agent agent) {
+    public IncidentChangeEvent(Object source, Integer incidentId, ChangeType changeType, String description, LocalDateTime dateEvenement, Agent agent) {
         super(source);
         this.incidentId = incidentId;
-        this.incidentDescription = incidentDescription;
         this.changeType = changeType;
         this.description = description;
         this.dateEvenement = dateEvenement;
@@ -35,10 +33,6 @@ public class IncidentChangeEvent extends ApplicationEvent {
 
     public Integer getIncidentId() {
         return incidentId;
-    }
-
-    public String getIncidentDescription() {
-        return incidentDescription;
     }
 
     public ChangeType getChangeType() {

@@ -24,7 +24,7 @@ public class IncidentEvent {
         STATUT_MODIFIE,
         DESCRIPTION_MODIFIEE,
         PRESTATAIRE_AFFECTE,
-        PRESTATAIRE_DESACTIVER,
+        PRESTATAIRE_DESACTIVE,
         INCIDENT_SUPPRIME
     }
 
@@ -78,10 +78,6 @@ public class IncidentEvent {
         return typeEvenement;
     }
 
-    public void setTypeEvenement(EventType typeEvenement) {
-        this.typeEvenement = typeEvenement;
-    }
-
     public String getDescription() {
         return description;
     }
@@ -92,10 +88,6 @@ public class IncidentEvent {
 
     public LocalDateTime getDateEvenement() {
         return dateEvenement;
-    }
-
-    public void setDateEvenement(LocalDateTime dateEvenement) {
-        this.dateEvenement = dateEvenement;
     }
 
     public Agent getAgent() {

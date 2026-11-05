@@ -21,6 +21,22 @@ The following guides illustrate how to use some features concretely:
 * [Serving Web Content with Spring MVC](https://spring.io/guides/gs/serving-web-content/)
 * [Building REST services with Spring](https://spring.io/guides/tutorials/rest/)
 
+### Tests
+
+Run the unit tests without a database with:
+
+```shell
+.\mvnw.cmd test
+```
+
+Run the MySQL integration tests as well with:
+
+```shell
+.\mvnw.cmd verify
+```
+
+The integration tests use Testcontainers to start a temporary MySQL 8.4 database, so Docker Desktop (or another Docker daemon) must be running. The container is isolated from the application's configured development database.
+
 ### Maven Parent overrides
 
 Due to Maven's design, elements are inherited from the parent POM to the project POM.
@@ -28,4 +44,3 @@ While most of the inheritance is fine, it also inherits unwanted elements like `
 parent.
 To prevent this, the project POM contains empty overrides for these elements.
 If you manually switch to a different parent and actually want the inheritance, you need to remove those overrides.
-

@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,4 +31,16 @@ public interface EvaluationRepository extends JpaRepository<Evaluation, Integer>
             order by evaluation.date desc
             """)
     List<Evaluation> findByPrestataireId(@Param("prestataireId") Integer prestataireId);
+
+    @Query("""
+            select evaluation.note
+            from Evaluation evaluation
+            join evaluation.incident incident
+            where incident.prestataire.id = :prestataireId
+            order by evaluation.date desc, evaluation.id desc
+            """)
+    List<Integer> findRecentNotesByPrestataireId(
+            @Param("prestataireId") Integer prestataireId,
+            Pageable pageable
+    );
 }

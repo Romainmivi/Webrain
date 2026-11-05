@@ -8,6 +8,7 @@ import altn72.project.modele.Prestataire;
 import altn72.project.modele.PrestataireRepository;
 import altn72.project.modele.Station;
 import altn72.project.modele.StationRepository;
+import altn72.project.service.PrestataireSurveillanceService;
 import altn72.project.modele.equipements.Ascenseur;
 import altn72.project.modele.equipements.Equipement;
 import altn72.project.modele.equipements.EquipementRepository;
@@ -22,6 +23,7 @@ import jakarta.persistence.PersistenceContext;
 import org.hibernate.Hibernate;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -81,6 +83,9 @@ class DatabaseIntegrationIT {
 
     @Autowired
     private PrestataireRepository prestataireRepository;
+
+    @Autowired
+    private PrestataireSurveillanceService prestataireSurveillanceService;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -178,6 +183,45 @@ class DatabaseIntegrationIT {
                 evaluations.getFirst().getIncident().getPrestataire().getId()
         );
         assertTrue(Hibernate.isInitialized(evaluations.getFirst().getIncident().getEquipement()));
+    }
+
+    @Test
+    @Transactional
+    void selectionneLesCinqEvaluationsLesPlusRecentesAvecDepartageParIdentifiant() {
+        Prestataire prestataire = prestataireRepository.saveAndFlush(
+                Prestataire.creer("Prestataire surveillé", "0102030405", "surveillance@example.com")
+        );
+        List<Integer> notesChronologiques = List.of(1, 2, 3, 3, 3, 5);
+        List<LocalDateTime> dates = List.of(
+                LocalDateTime.of(2026, 1, 1, 10, 0),
+                LocalDateTime.of(2026, 1, 2, 10, 0),
+                LocalDateTime.of(2026, 1, 3, 10, 0),
+                LocalDateTime.of(2026, 1, 4, 10, 0),
+                LocalDateTime.of(2026, 1, 5, 10, 0),
+                LocalDateTime.of(2026, 1, 5, 10, 0)
+        );
+
+        for (int i = 0; i < notesChronologiques.size(); i++) {
+            Fixture fixture = creerFixture(false);
+            fixture.incident().setPrestataire(prestataire);
+            incidentRepository.saveAndFlush(fixture.incident());
+            evaluationRepository.saveAndFlush(
+                    Evaluation.creer(notesChronologiques.get(i), null, dates.get(i), fixture.incident())
+            );
+        }
+        entityManager.flush();
+        entityManager.clear();
+
+        List<Integer> recentNotes = evaluationRepository.findRecentNotesByPrestataireId(
+                prestataire.getId(),
+                PageRequest.of(0, 5)
+        );
+        PrestataireSurveillanceService.EtatSurveillance etat =
+                prestataireSurveillanceService.analyser(prestataire.getId());
+
+        assertEquals(List.of(5, 3, 3, 3, 2), recentNotes);
+        assertEquals(3.2, etat.moyenneDernieresEvaluations());
+        assertFalse(etat.sousSurveillance());
     }
 
     @Test
